@@ -1,0 +1,77 @@
+from __future__ import annotations
+import pygame as pg
+from typing import override
+from src.sprites import Animation
+from src.utils import Position, PositionCamera, Direction, GameSettings
+from src.core import GameManager
+
+
+class Entity:
+    animation: Animation
+    direction: Direction
+    position: Position
+    game_manager: GameManager
+    
+    def __init__(self, x: float, y: float, game_manager: GameManager):
+        # Sprite is only for debug, need to change into animations
+        self.animation = Animation(
+            "character/ow1.png", ["down", "left", "right", "up"], 4,
+            (GameSettings.TILE_SIZE, GameSettings.TILE_SIZE)
+        )
+        
+        self.position = Position(x, y)
+        self.direction = Direction.DOWN
+        self.animation.update_pos(self.position)
+        self.game_manager = game_manager
+
+    def update(self, dt: float):
+        self.animation.update_pos(self.position)
+        self.animation.update(dt)
+        
+    def draw(self, screen: pg.Surface, camera: PositionCamera):
+        self.animation.draw(screen, camera)
+        if GameSettings.DRAW_HITBOXES:
+            self.animation.draw_hitbox(screen, camera)
+            
+
+    @staticmethod
+    def _snap_to_grid(value: float):
+        return round(value / GameSettings.TILE_SIZE) * GameSettings.TILE_SIZE
+    
+    @property
+    def camera(self):
+
+        if self.game_manager.player:
+            
+            camera = self.game_manager.player
+            screen_width, screen_height = GameSettings.SCREEN_WIDTH, GameSettings.SCREEN_HEIGHT
+            map_width = self.game_manager.current_map.width * GameSettings.TILE_SIZE
+            map_height = self.game_manager.current_map.height * GameSettings.TILE_SIZE
+            
+            cam_x = self.game_manager.player.position.x - screen_width // 2
+            cam_y =self.game_manager.player.position.y - screen_height // 2
+
+            cam_x = max(0, min(cam_x, map_width - screen_width))
+            cam_y = max(0, min(cam_y, map_height - screen_height))
+
+            camera = PositionCamera(cam_x, cam_y)
+            
+            return camera
+        else:
+            camera = PositionCamera(0, 0)
+            return camera
+            
+        
+        
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "x": self.position.x / GameSettings.TILE_SIZE,
+            "y": self.position.y / GameSettings.TILE_SIZE,
+        }
+        
+    @classmethod
+    def from_dict(cls, data: dict[str, float | int], game_manager: GameManager) -> Entity:
+        x = float(data["x"])
+        y = float(data["y"])
+        return cls(x * GameSettings.TILE_SIZE, y * GameSettings.TILE_SIZE, game_manager)
+        
