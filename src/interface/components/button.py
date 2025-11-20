@@ -59,7 +59,7 @@ class Button(UIComponent):
             
     @override
     def draw(self, screen: pg.Surface):
-        pass
+        
         '''
         [TODO HACKATHON 1]
         You might want to change this too

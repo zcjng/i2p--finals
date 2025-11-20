@@ -177,7 +177,7 @@ class GameManager:
             return
         
         from src.scenes.battle_scene import BattleScene
-        battle_scene = BattleScene(player_pokemon, wild_pokemon)
+        battle_scene = BattleScene(player_pokemon, wild_pokemon, self)
         scene_manager.register_scene('battle', battle_scene)
         scene_manager.change_scene('battle')
         

@@ -33,7 +33,7 @@ class Engine:
         Register the setting scene here
         
         '''
-        scene_manager.change_scene("menu")
+        scene_manager.change_scene("game")
         self.drawing = False
         self.draw_positions = []
 
@@ -47,7 +47,7 @@ class Engine:
             self.render()
 
     def handle_events(self):
-        input_manager.reset()
+        
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.running = False
@@ -68,7 +68,7 @@ class Engine:
             
     def update(self, dt: float):
         scene_manager.update(dt)
-        
+        input_manager.reset()
 
     def render(self):
         self.screen.fill((0, 0, 0))     # Make sure the display is cleared
