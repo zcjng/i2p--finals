@@ -2,7 +2,7 @@ import pygame as pg
 import pytmx
 
 from src.utils import load_tmx, Position, GameSettings, PositionCamera, Teleport
-
+from src.utils.definition import PC
 class Map:
     # Map Properties
     path_name: str
@@ -32,6 +32,7 @@ class Map:
         self._collision_map = self._create_collision_map()
 
         self.bushes = self.bush_map()
+        self.pc_tiles = self.pc_map()
         
         
     def update(self, dt: float):
@@ -55,6 +56,16 @@ class Map:
                 GameSettings.TILE_SIZE
             )
             pg.draw.rect(screen, (0, 255, 0), camera.transform_rect(rect), 1)
+            
+        for tile_x, tile_y in self.pc_tiles:
+            rect = pg.Rect(
+                tile_x * GameSettings.TILE_SIZE,
+                tile_y * GameSettings.TILE_SIZE,
+                GameSettings.TILE_SIZE,
+                GameSettings.TILE_SIZE
+            )
+            pg.draw.rect(screen, (0, 0, 255), camera.transform_rect(rect), 2)
+            
     def check_collision(self, rect: pg.Rect):
         '''
         [TODO HACKATHON 4]
@@ -86,6 +97,28 @@ class Map:
         
         return self.bush_zone(tile_x, tile_y)
     
+    def pc_map(self):
+        """Load PC tile positions from the map"""
+        pc_tiles = set()
+        PC_TILE_ID = 200  # Change this to match your tile ID
+        
+        for layer in self.tmxdata.visible_layers:
+            if isinstance(layer, pytmx.TiledTileLayer) and ("PC" in layer.name):
+                for x, y, gid in layer:
+                    if gid >= PC_TILE_ID:
+                        pc_tiles.add((x, y))
+                break
+        
+
+        return pc_tiles
+
+    def is_near_pc(self, pos: Position):
+        """Check if position is on or near a PC tile"""
+        tile_x = int(pos.x // GameSettings.TILE_SIZE)
+        tile_y = int(pos.y // GameSettings.TILE_SIZE)
+        
+        return (tile_x, tile_y) in self.pc_tiles
+
     def check_teleport(self, pos: Position): 
         TELEPORT_SIZE = GameSettings.TILE_SIZE * 1.15
         

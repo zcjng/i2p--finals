@@ -82,3 +82,22 @@ class Item(TypedDict):
     name: str
     count: int
     sprite_path: str
+    
+@dataclass
+class PC:
+    pos: Position
+    name: str = "PC Storage"
+    
+    def to_dict(self):
+        return {
+            "x": self.pos.x // GameSettings.TILE_SIZE,
+            "y": self.pos.y // GameSettings.TILE_SIZE,
+            "name": self.name
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            Position(data["x"] * GameSettings.TILE_SIZE, data["y"] * GameSettings.TILE_SIZE),
+            data.get("name", "PC Storage")
+        )

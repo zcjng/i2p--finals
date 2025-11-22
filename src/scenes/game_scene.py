@@ -24,7 +24,7 @@ class GameScene(Scene):
         if gm is not None:
             self.game_manager = gm
         else:
-            manager = GameManager.load("saves/game0.json")
+            manager = GameManager.load("saves/game1.json")
             if manager is None:
                 Logger.error("Failed to load game manager")
                 exit(1)
@@ -40,7 +40,22 @@ class GameScene(Scene):
             self.online_manager = None
         self.sprite_online = Sprite("ingame_ui/options1.png", (GameSettings.TILE_SIZE, GameSettings.TILE_SIZE))
         
+    def check_pc_interaction(self):
+        """Check if player is near a PC and wants to interact"""
+        if not self.game_manager.player:
+            return
         
+        if input_manager.key_pressed(pg.K_e):  # Press E to interact with PC
+            player_pos = self.game_manager.player.position
+            Logger.info(f"Player pressed E at position ({player_pos.x}, {player_pos.y})")
+            
+            # Check if player is on a PC tile
+            if self.game_manager.current_map.is_near_pc(player_pos):
+                self.game_manager.pc_storage.open()
+                Logger.info("Opened PC Storage")
+            else:
+                Logger.info("Player not near a PC")
+                
     def save_game(self):
         save_path = 'saves/game1.json'
         save = self.game_manager.save(save_path)
@@ -79,10 +94,12 @@ class GameScene(Scene):
 
         # Update player and other data
 
-        if not self.game_manager.options.overlay and not self.game_manager.bag.overlay:
+        if not self.game_manager.options.overlay and not self.game_manager.bag.overlay and not self.game_manager.pc_storage.is_open:
             self.game_manager.map_transition(dt)
+            self.check_pc_interaction()
             # Update others
-
+            
+                
             if self.game_manager.player and not self.game_manager.in_battle:
                 moving = self.game_manager.player.moving
                 
@@ -103,7 +120,9 @@ class GameScene(Scene):
                             self.game_manager.wild_encounter()
                             break
             
-        if self.game_manager.options.overlay:
+        if self.game_manager.pc_storage.is_open:
+            self.game_manager.pc_storage.update(dt)
+        elif self.game_manager.options.overlay:
             self.game_manager.options.update(dt)  # updates ALL buttons and slider
         elif self.game_manager.bag.overlay:
             self.game_manager.bag.update(dt)
@@ -168,3 +187,6 @@ class GameScene(Scene):
         
         if self.game_manager._transitioning and self.game_manager._transition_surface:
             screen.blit(self.game_manager._transition_surface, (0, 0))
+            
+        if self.game_manager.pc_storage.is_open:
+            self.game_manager.pc_storage.draw(screen, self.game_manager.bag)

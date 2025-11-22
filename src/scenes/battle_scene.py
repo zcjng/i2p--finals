@@ -51,7 +51,7 @@ class BattleScene(Scene):
         self.e_front_sprite = Sprite(self.enemy.battle_sprite, (400, 400), 'left')
         self.e_front_sprite.update_pos(Position(px + 50, py - 380))
         
-        self.message_box = Sprite("UI/raw/UI_Flat_Banner03a.png", (750, 200))
+        self.message_box = Sprite("UI/raw/UI_Battle_Frame.png", (1282, 212))
 
         
         # Battle state
@@ -84,7 +84,7 @@ class BattleScene(Scene):
         self.pokemon_button = Button(
             "UI/raw/UI_Flat_InputField01a.png", "UI/raw/UI_Flat_InputField01a.png",
             px + 150, py + 260, 200, 90,
-            lambda: scene_manager.change_scene("menu")
+            lambda: self.catch_pokemon(enemy_pokemon)
         )
         
         self.run_button = Button(
@@ -146,6 +146,19 @@ class BattleScene(Scene):
         self.player_turn = True
         self.waiting_input = True
         
+    def catch_pokemon(self, enemy_pokemon):
+        if self.game_manager.pc_storage.is_bag_full(self.game_manager.bag):
+
+            self.game_manager.pc_storage.deposit_pokemon(enemy_pokemon)
+            self.message = f"Caught {self.enemy.name}! Sent to PC (Bag full)"
+        else:
+
+            self.game_manager.bag._monsters_data.append(enemy_pokemon)
+            self.message = f"You just caught {self.enemy.name}!"
+            
+        self.battle_over = True
+        self.battle_end_timer = 2.0
+        
     @override
     def enter(self):
         if not sound_manager.current_bgm:
@@ -197,13 +210,13 @@ class BattleScene(Scene):
         px = GameSettings.SCREEN_WIDTH // 2
         py = GameSettings.SCREEN_HEIGHT // 2
     
-        screen.blit(self.message_box.image, (px - 635 , py + 150))
+        screen.blit(self.message_box.image, (px - 640 , py + 150))
 
         
 
         
-        font = pg.font.Font(None, 40)
-        text = font.render(self.message, True, (50, 50, 50))
+        font = pg.font.Font("assets/fonts/Pokemon.ttf", 55)
+        text = font.render(self.message, True, (255, 255, 255))
         screen.blit(text, (px - 580 , py + 200))
         
         if self.waiting_input and not self.battle_over:
@@ -215,5 +228,5 @@ class BattleScene(Scene):
             button_font = pg.font.Font(None, 36)
             screen.blit(button_font.render("FIGHT", True, (50, 50, 50)), (px + 200, py + 180))
             screen.blit(button_font.render("BAG", True, (50, 50, 50)), (px + 445, py + 180))
-            screen.blit(button_font.render("POKEMON", True, (50, 50, 50)), (px + 175, py + 290))
+            screen.blit(button_font.render("CATCH", True, (50, 50, 50)), (px + 200, py + 290))
             screen.blit(button_font.render("RUN", True, (50, 50, 50)), (px + 450, py + 290))

@@ -36,9 +36,11 @@ class GameManager:
                  player: Player | None,
                  enemy_trainers: dict[str, list[EnemyTrainer]], 
                  bag: Bag | None = None,
-                 options: Options | None = None):
+                 options: Options | None = None,
+                 pc_storage = None):
                      
         from src.data.bag import Bag
+        from src.data.pc import PCStorage
         # Game Properties
         self.maps = maps
         self.current_map_key = start_map
@@ -46,6 +48,7 @@ class GameManager:
         self.enemy_trainers = enemy_trainers
         self.bag = bag if bag is not None else Bag([], [])
         self.options = options if options is not None else Options()
+        self.pc_storage = pc_storage if pc_storage is not None else PCStorage()
         self.steps_per_check = 1
         self.steps_last = 0
         self.encounter_rate = 0.2
@@ -183,7 +186,7 @@ class GameManager:
         
     def get_random_wild_pokemon(self):
         area_pokemon = {
-            "map.tmx" : [
+            "map3.tmx" : [
                 { "name": "Venusaur",  "hp": 90,  "max_hp": 160, "level": 30, "sprite_path": "menu_sprites/menusprite4.png", "battle_sprite": "sprites/sprite4.png"},
                 { "name": "Gengar",    "hp": 110, "max_hp": 140, "level": 28, "sprite_path": "menu_sprites/menusprite5.png", "battle_sprite": "sprites/sprite5.png"},
                 { "name": "Dragonite", "hp": 180, "max_hp": 220, "level": 40, "sprite_path": "menu_sprites/menusprite6.png", "battle_sprite": "sprites/sprite6.png"}
@@ -245,7 +248,8 @@ class GameManager:
             "current_map": self.current_map_key,
             "player": self.player.to_dict() if self.player is not None else None,
             "bag": self.bag.to_dict(),
-            "options": {}
+            "options": {},
+            "pc_storage": self.pc_storage.to_dict()
         }
 
     @classmethod
@@ -254,6 +258,7 @@ class GameManager:
         from src.entities.player import Player
         from src.entities.enemy_trainer import EnemyTrainer
         from src.data.bag import Bag
+        from src.data.pc import PCStorage
         
         Logger.info("Loading maps")
         maps_data = data["map"]
@@ -292,5 +297,8 @@ class GameManager:
         from src.data.bag import Bag as _Bag
         gm.bag = Bag.from_dict(data.get("bag", {})) if data.get("bag") else _Bag([], [])
         gm.options = Options()
+        
+        Logger.info("Loading PC Storage")
+        gm.pc_storage = PCStorage.from_dict(data.get("pc_storage", {})) if data.get("pc_storage") else PCStorage()
 
         return gm
