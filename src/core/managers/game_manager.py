@@ -187,15 +187,15 @@ class GameManager:
     def get_random_wild_pokemon(self):
         area_pokemon = {
             "map3.tmx" : [
-                { "name": "Venusaur",  "hp": 90,  "max_hp": 160, "level": 30, "sprite_path": "menu_sprites/menusprite4.png", "battle_sprite": "sprites/sprite4.png"},
-                { "name": "Gengar",    "hp": 110, "max_hp": 140, "level": 28, "sprite_path": "menu_sprites/menusprite5.png", "battle_sprite": "sprites/sprite5.png"},
-                { "name": "Dragonite", "hp": 180, "max_hp": 220, "level": 40, "sprite_path": "menu_sprites/menusprite6.png", "battle_sprite": "sprites/sprite6.png"}
+                { "name": "Venusaur",  "hp": 160,  "max_hp": 160, "level": 30, "sprite_path": "menu_sprites/menusprite4.png", "battle_sprite": "sprites/sprite4.png"},
+                { "name": "Gengar",    "hp": 140, "max_hp": 140, "level": 28, "sprite_path": "menu_sprites/menusprite5.png", "battle_sprite": "sprites/sprite5.png"},
+                { "name": "Dragonite", "hp": 220, "max_hp": 220, "level": 40, "sprite_path": "menu_sprites/menusprite6.png", "battle_sprite": "sprites/sprite6.png"}
             ]
         }
 
         pokemon_list = area_pokemon.get(self.current_map_key, [])
         if not pokemon_list:
-            return {"name": "Venusaur",  "hp": 90,  "max_hp": 160, "level": 30, "sprite_path": "menu_sprites/menusprite4.png", "battle_sprite": "sprites/sprite4.png"}
+            return {"name": "Venusaur",  "hp": 160,  "max_hp": 160, "level": 30, "sprite_path": "menu_sprites/menusprite4.png", "battle_sprite": "sprites/sprite4.png"}
         
         return random.choice(pokemon_list)
     

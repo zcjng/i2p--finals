@@ -60,7 +60,7 @@ class PCStorage:
             return self._stored_monsters.pop(index)
         return None
     
-    def is_bag_full(self, bag) -> bool:
+    def is_bag_full(self, bag):
         """Check if the bag has reached max capacity"""
         return len(bag._monsters_data) >= self.MAX_BAG_SIZE
     
