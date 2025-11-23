@@ -43,13 +43,13 @@ class Entity:
 
         if self.game_manager.player:
             
-            camera = self.game_manager.player
+            
             screen_width, screen_height = GameSettings.SCREEN_WIDTH, GameSettings.SCREEN_HEIGHT
             map_width = self.game_manager.current_map.width * GameSettings.TILE_SIZE
             map_height = self.game_manager.current_map.height * GameSettings.TILE_SIZE
             
             cam_x = self.game_manager.player.position.x - screen_width // 2
-            cam_y =self.game_manager.player.position.y - screen_height // 2
+            cam_y = self.game_manager.player.position.y - screen_height // 2
 
             cam_x = max(0, min(cam_x, map_width - screen_width))
             cam_y = max(0, min(cam_y, map_height - screen_height))

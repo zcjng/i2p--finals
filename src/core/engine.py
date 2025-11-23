@@ -33,7 +33,7 @@ class Engine:
         Register the setting scene here
         
         '''
-        scene_manager.change_scene("game")
+        scene_manager.change_scene("menu")
         self.drawing = False
         self.draw_positions = []
 
@@ -72,7 +72,9 @@ class Engine:
 
     def render(self):
         self.screen.fill((0, 0, 0))     # Make sure the display is cleared
-        scene_manager.draw(self.screen) # Draw the current scene
+        scene_manager.draw(self.screen)
+        # Draw the current scene
+        '''
         for pos in self.draw_positions:
             pg.draw.circle(self.screen, 'RED', pos, 2)
             
@@ -80,4 +82,5 @@ class Engine:
         cursor_pos = pg.mouse.get_pos()
             
         pg.draw.circle(self.screen, 'RED', cursor_pos, 5)
+        '''
         pg.display.flip()             # Render the display

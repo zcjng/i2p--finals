@@ -227,7 +227,7 @@ class GameManager:
             data = json.load(f)
         return cls.from_dict(data)
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self):
         map_blocks: list[dict[str, object]] = []
         for key, m in self.maps.items():
             block = m.to_dict()

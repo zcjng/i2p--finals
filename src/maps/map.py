@@ -79,7 +79,6 @@ class Map:
         
     def bush_map(self):
         bush_tiles = set()
-        BUSH_ID = {4, 7}
         for layer in self.tmxdata.visible_layers:
             if isinstance(layer, pytmx.TiledTileLayer) and ("PokemonBush" in layer.name):
                 for x, y, gid in layer:
@@ -124,11 +123,11 @@ class Map:
         
         for teleporter in self.teleporters:
             teleport_rect = pg.Rect(
-            teleporter.pos.x, 
-            teleporter.pos.y, 
-            TELEPORT_SIZE, 
-            TELEPORT_SIZE
-        )
+                teleporter.pos.x, 
+                teleporter.pos.y, 
+                TELEPORT_SIZE, 
+                TELEPORT_SIZE
+            )
         
             if teleport_rect.collidepoint(pos.x, pos.y):
                 return teleporter
@@ -142,7 +141,7 @@ class Map:
             # elif isinstance(layer, pytmx.TiledImageLayer) and layer.image:
             #     target.blit(layer.image, (layer.x or 0, layer.y or 0))
  
-    def _render_tile_layer(self, target: pg.Surface, layer: pytmx.TiledTileLayer) -> None:
+    def _render_tile_layer(self, target: pg.Surface, layer: pytmx.TiledTileLayer):
         for x, y, gid in layer:
             if gid == 0:
                 continue

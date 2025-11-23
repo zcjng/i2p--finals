@@ -10,8 +10,8 @@
         }
       ],
       "player": {
-        "x": 23.0,
-        "y": 30.0
+        "x": 24.0,
+        "y": 23.0
       },
       "enemy_trainers": [
         {
@@ -19,7 +19,7 @@
           "y": 29.0,
           "classification": "stationary",
           "facing": "DOWN",
-          "max_tiles": 2
+          "max_tiles": 3
         },
         {
           "x": 54.0,
@@ -33,7 +33,7 @@
           "y": 31.0,
           "classification": "stationary",
           "facing": "UP",
-          "max_tiles": 2
+          "max_tiles": 3
         }
       ]
     },
@@ -58,15 +58,15 @@
       ],
       "player": {
         "x": 12.0,
-        "y": 11.0
+        "y": 14.0
       },
       "enemy_trainers": []
     }
   ],
   "current_map": "map3.tmx",
   "player": {
-    "x": 23.0,
-    "y": 30.0
+    "x": 24.0,
+    "y": 23.0
   },
   "bag": {
     "monsters": [
