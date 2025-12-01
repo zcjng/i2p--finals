@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from src.maps.map import Map
     from src.entities.player import Player
     from src.entities.enemy_trainer import EnemyTrainer
+    from src.entities.npc import NPC
     from src.data.bag import Bag
 
 
@@ -17,6 +18,7 @@ class GameManager:
     # Entities
     player: Player | None
     enemy_trainers: dict[str, list[EnemyTrainer]]
+    npcs: dict[str, list[NPC]]
     bag: "Bag"
     options: "Options"
     
@@ -35,6 +37,7 @@ class GameManager:
     def __init__(self, maps: dict[str, Map], start_map: str, 
                  player: Player | None,
                  enemy_trainers: dict[str, list[EnemyTrainer]], 
+                 npcs: dict[str, list[NPC]],
                  bag: Bag | None = None,
                  options: Options | None = None,
                  pc_storage = None):
@@ -46,6 +49,7 @@ class GameManager:
         self.current_map_key = start_map
         self.player = player
         self.enemy_trainers = enemy_trainers
+        self.npcs = npcs
         self.bag = bag if bag is not None else Bag([], [])
         self.options = options if options is not None else Options()
         self.pc_storage = pc_storage if pc_storage is not None else PCStorage()
@@ -65,6 +69,9 @@ class GameManager:
     def current_enemy_trainers(self):
         return self.enemy_trainers[self.current_map_key]
         
+    @property
+    def current_npcs(self):
+        return self.npcs[self.current_map_key]
     @property
     def current_teleporter(self):
         return self.maps[self.current_map_key].teleporters
@@ -127,7 +134,9 @@ class GameManager:
         for entity in self.enemy_trainers[self.current_map_key]:
             if rect.colliderect(entity.animation.rect):
                 return True
-        
+        for entity in self.npcs[self.current_map_key]:
+            if rect.colliderect(entity.animation.rect):
+                return True
         return False
         
     def bush_interaction(self, just_stopped):
@@ -232,6 +241,7 @@ class GameManager:
         for key, m in self.maps.items():
             block = m.to_dict()
             block["enemy_trainers"] = [t.to_dict() for t in self.enemy_trainers.get(key, [])]
+            block["npcs"] = [t.to_dict() for t in self.npcs.get(key, [])]
             
             if self.player and self.current_map_key == key:
                 player_pos = self.player.position
@@ -257,6 +267,7 @@ class GameManager:
         from src.maps.map import Map
         from src.entities.player import Player
         from src.entities.enemy_trainer import EnemyTrainer
+        from src.entities.npc import NPC
         from src.data.bag import Bag
         from src.data.pc import PCStorage
         
@@ -265,6 +276,7 @@ class GameManager:
         maps: dict[str, Map] = {}
         player_spawns: dict[str, Position] = {}
         trainers: dict[str, list[EnemyTrainer]] = {}
+        npc: dict[str, list[NPC]] = {}
 
         for entry in maps_data:
             path = entry["path"]
@@ -280,6 +292,7 @@ class GameManager:
             maps, current_map,
             None, # Player
             trainers,
+            npc,
             bag=None
         )
         gm.current_map_key = current_map
@@ -292,6 +305,11 @@ class GameManager:
         Logger.info("Loading Player")
         if data.get("player"):
             gm.player = Player.from_dict(data["player"], gm)
+            
+        Logger.info("Loading NPCs")
+        for m in data["map"]:
+            raw_data = m["npc"]
+            gm.npcs[m["path"]] = [NPC.from_dict(t, gm) for t in raw_data]
         
         Logger.info("Loading bag")
         from src.data.bag import Bag as _Bag

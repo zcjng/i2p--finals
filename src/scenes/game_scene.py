@@ -119,6 +119,10 @@ class GameScene(Scene):
                             
                             self.game_manager.wild_encounter()
                             break
+                        
+                for npc in self.game_manager.current_npcs:
+                    npc.update(dt)
+                
             
         if self.game_manager.pc_storage.is_open:
             self.game_manager.pc_storage.update(dt)
@@ -156,6 +160,9 @@ class GameScene(Scene):
             
         for enemy in self.game_manager.current_enemy_trainers:
             enemy.draw(screen, camera)
+            
+        for npc in self.game_manager.current_npcs:
+            npc.draw(screen, camera)
 
 
         

@@ -7,11 +7,16 @@
           "x": 24,
           "y": 21,
           "destination": "gym.tmx"
+        },
+        {
+          "x":15,
+          "y":26,
+          "destination": "house.tmx"
         }
       ],
       "player": {
-        "x": 24.0,
-        "y": 23.0
+        "x": 16.0,
+        "y": 28.0
       },
       "enemy_trainers": [
         {
@@ -35,7 +40,8 @@
           "facing": "UP",
           "max_tiles": 3
         }
-      ]
+      ],
+      "npc": []
     },
     {
       "path": "gym.tmx",
@@ -60,13 +66,38 @@
         "x": 12.0,
         "y": 14.0
       },
-      "enemy_trainers": []
+      "enemy_trainers": [],
+      "npc": []
+    },
+    {
+      "path": "house.tmx",
+      "teleport": [
+        {
+          "x": 12,
+          "y": 15,
+          "destination": "map3.tmx"
+        }
+      ],
+      "player": {
+        "x": 12.0,
+        "y": 14.0
+      },
+      "enemy_trainers": [],
+      "npc": [
+        {
+          "x": 12.0,
+          "y": 4.0,
+          "classification": "stationary",
+          "facing": "DOWN",
+          "max_tiles": 2
+        }
+      ]
     }
   ],
-  "current_map": "map3.tmx",
+  "current_map": "house.tmx",
   "player": {
-    "x": 24.0,
-    "y": 23.0
+    "x": 12.0,
+    "y": 14.0
   },
   "bag": {
     "monsters": [
