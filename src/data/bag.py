@@ -12,10 +12,10 @@ class Bag:
     _items_data: list[Item]
     
     
-    def __init__(self, monsters_data: list[Monster] | None = None, items_data: list[Item] | None = None):
+    def __init__(self, monsters_data: list[Monster] | None = None, items_data: list[Item] | None = None, money: int = 0):
         self._monsters_data = monsters_data if monsters_data else []
         self._items_data = items_data if items_data else []
-        
+        self.money = money  
         self.overlay = False
         
         self.dim_overlay = pg.Surface((GameSettings.SCREEN_WIDTH, GameSettings.SCREEN_HEIGHT)) # Set transparency level (0-255)
@@ -47,6 +47,30 @@ class Bag:
         
         self.frame = Sprite("UI/raw/UI_Flat_Frame03a.png", (700, 500))
         
+    def add_money(self, amount: int):
+        self.money += amount
+        
+    def spend_money(self, amount: int):
+        if self.money >= amount:
+            self.money -= amount
+            return True
+        return False
+    
+    def add_item(self, item_name: str, sprite_path: str, count: int = 1):
+        """Add an item to the bag or increase its count"""
+        # Check if item already exists
+        for item in self._items_data:
+            if item["name"] == item_name:
+                item["count"] += count
+                return
+        
+        # If not, add new item
+        self._items_data.append({
+            "name": item_name,
+            "count": count,
+            "sprite_path": sprite_path
+        })
+        
     def update(self, dt: float):
         
         if self.overlay:
@@ -58,7 +82,9 @@ class Bag:
     def draw(self, screen: pg.Surface):
         self.bag_button.draw(screen)
         screen.blit(self.frame.image, (GameSettings.SCREEN_WIDTH // 2 - 350, GameSettings.SCREEN_HEIGHT // 2 - 250))
-  
+        money_text = self.font.render(f"Money: ${self.money}", True, (255, 215, 0))
+        screen.blit(money_text, (GameSettings.SCREEN_WIDTH // 2 - 300, GameSettings.SCREEN_HEIGHT // 2 - 220))
+        
         animal_y = self.animal_start_y
         item_y = self.item_start_y
         for monster in self._monsters_data:
@@ -109,12 +135,14 @@ class Bag:
     def to_dict(self):
         return {
             "monsters": list(self._monsters_data),
-            "items": list(self._items_data)
+            "items": list(self._items_data),
+            "money": self.money
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> "Bag":
         monsters = data.get("monsters") or []
         items = data.get("items") or []
-        bag = cls(monsters, items)
+        money = data.get("money", 0)
+        bag = cls(monsters, items, money)
         return bag

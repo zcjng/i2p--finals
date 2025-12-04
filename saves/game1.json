@@ -100,6 +100,7 @@
     "y": 14.0
   },
   "bag": {
+    "money" : 5000,
     "monsters": [
       {
         "name": "Pikachu",
@@ -147,11 +148,6 @@
         "name": "Potion",
         "count": 5,
         "sprite_path": "ingame_ui/potion.png"
-      },
-      {
-        "name": "Coins",
-        "count": 3,
-        "sprite_path": "ingame_ui/coin.png"
       },
       {
         "name": "Pokeball",

@@ -9,7 +9,7 @@ from src.sprites import Sprite
 from src.core import GameManager
 from src.core.services import input_manager, scene_manager
 from src.utils import GameSettings, Direction, Position, PositionCamera
-
+from src.data.shop import Shop
 
 class NPCClassification(Enum):
     STATIONARY = "stationary"
@@ -50,13 +50,14 @@ class NPC(Entity):
         self.warning_sign = Sprite("exclamation.png", (GameSettings.TILE_SIZE // 2, GameSettings.TILE_SIZE // 2))
         self.warning_sign.update_pos(Position(x + GameSettings.TILE_SIZE // 4, y - GameSettings.TILE_SIZE // 2))
         self.detected = False
-
+        self.shop = Shop(game_manager)
     @override
     def update(self, dt: float):
         self._movement.update(self, dt)
         self._has_los_to_player()
         if self.detected and input_manager.key_pressed(pygame.K_SPACE):
-            pass
+            self.shop.open()
+        self.shop.update(dt)
         self.animation.update_pos(self.position)
 
     @override
@@ -68,7 +69,7 @@ class NPC(Entity):
             los_rect = self._get_los_rect()
             if los_rect is not None:
                 pygame.draw.rect(screen, (255, 255, 0), camera.transform_rect(los_rect), 1)
-
+        self.shop.draw(screen)
     def _set_direction(self, direction: Direction):
         self.direction = direction
         if direction == Direction.RIGHT:

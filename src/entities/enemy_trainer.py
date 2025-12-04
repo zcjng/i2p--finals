@@ -9,7 +9,7 @@ from src.sprites import Sprite
 from src.core import GameManager
 from src.core.services import input_manager, scene_manager
 from src.utils import GameSettings, Direction, Position, PositionCamera
-
+from src.data.shop import Shop
 
 class EnemyTrainerClassification(Enum):
     STATIONARY = "stationary"
@@ -50,6 +50,7 @@ class EnemyTrainer(Entity):
         self.warning_sign = Sprite("exclamation.png", (GameSettings.TILE_SIZE // 2, GameSettings.TILE_SIZE // 2))
         self.warning_sign.update_pos(Position(x + GameSettings.TILE_SIZE // 4, y - GameSettings.TILE_SIZE // 2))
         self.detected = False
+        
 
     @override
     def update(self, dt: float):

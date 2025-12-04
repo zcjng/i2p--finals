@@ -53,24 +53,20 @@ class OnlineManager:
             Logger.warning(f"OnlineManager registration error: {e}")
         return
 
-    def update(self, x: float, y: float, map_name: str) -> bool:
+    def update(self, x: float, y: float, map_name: str, direction: str = "down"):
         if self.player_id == -1:
             # Try to register again
             return False
         
         url = f"{self.base}/players"
-        body = {"id": self.player_id, "x": x, "y": y, "map": map_name}
+        body = {"id": self.player_id, "x": x, "y": y, "map": map_name,"direction": direction}
         try:
             resp = requests.post(url, json=body, timeout=5)
             if resp.status_code == 200:
                 return True
             Logger.warning(f"Update failed: {resp.status_code} {resp.text}")
         except Exception as e:
-            if self._on_error:
-                try:
-                    self._on_error(e)
-                except Exception:
-                    pass
+            
             Logger.warning(f"Online update error: {e}")
         return False
 
@@ -94,12 +90,12 @@ class OnlineManager:
         while not self._stop_event.wait(POLL_INTERVAL):
             self._fetch_players()
             
-    def _fetch_players(self) -> None:
+    def _fetch_players(self):
         try:
             url = f"{self.base}/players"
             resp = requests.get(url, timeout=5)
             resp.raise_for_status()
-            all_players = resp.json().get("players", [])
+            all_players = resp.json().get("players", {})
 
             pid = self.player_id
             filtered = [p for key, p in all_players.items() if int(key) != pid]

@@ -57,6 +57,7 @@ class GameManager:
         self.steps_last = 0
         self.encounter_rate = 0.2
         self.in_battle = False
+        self.overlay = False
         # Check If you should change scene
         self.should_change_scene = False
         self.next_map = ""

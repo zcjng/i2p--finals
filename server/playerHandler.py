@@ -4,7 +4,7 @@ import copy
 from dataclasses import dataclass
 from typing import Dict, Optional
 
-TIMEOUT_TIME = 60.0
+TIMEOUT_TIME = 5.0
 CHECK_INTERVAL_TIME = 10.0
 
 @dataclass
@@ -13,18 +13,22 @@ class Player:
     x: float
     y: float
     map: str
+    direction: str
     last_update: float
+    last_seen: float
 
-    def update(self, x: float, y: float, map: str) -> None:
+    def update(self, x: float, y: float, map: str, direction: str) -> None:
+        
+        self.last_seen = time.monotonic()
         if x != self.x or y != self.y or map != self.map:
             self.last_update = time.monotonic()
         self.x = x
         self.y = y
         self.map = map
-
+        self.direction = direction   
     def is_inactive(self) -> bool:
         now = time.monotonic()
-        return (now - self.last_update) >= TIMEOUT_TIME
+        return (now - self.last_seen) >= TIMEOUT_TIME
 
 
 class PlayerHandler:
@@ -62,7 +66,7 @@ class PlayerHandler:
             to_remove: list[int] = []
             with self._lock:
                 for pid, p in list(self.players.items()):
-                    if now - p.last_update >= TIMEOUT_TIME:
+                    if now - p.last_seen >= TIMEOUT_TIME:
                         to_remove.append(pid)
                 for pid in to_remove:
                     _ = self.players.pop(pid, None)
@@ -72,16 +76,18 @@ class PlayerHandler:
         with self._lock:
             pid = self._next_id
             self._next_id += 1
-            self.players[pid] = Player(pid, 0.0, 0.0, "", time.monotonic())
+            now = time.monotonic()
+            
+            self.players[pid] = Player(pid, 0.0, 0.0, "", "down", now, now)
             return pid
 
-    def update(self, pid: int, x: float, y: float, map_name: str) -> bool:
+    def update(self, pid: int, x: float, y: float, map_name: str, direction: str) -> bool:
         with self._lock:
             p = self.players.get(pid)
             if not p:
                 return False
             else:
-                p.update(float(x), float(y), str(map_name))
+                p.update(float(x), float(y), str(map_name), str(direction))
                 return True
 
     def list_players(self) -> dict:
@@ -92,6 +98,7 @@ class PlayerHandler:
                     "id": p.id,
                     "x": p.x,
                     "y": p.y,
-                    "map": p.map
+                    "map": p.map,
+                    "direction": p.direction
                 }
             return player_list

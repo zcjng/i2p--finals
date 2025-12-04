@@ -23,6 +23,9 @@ class Player(Entity):
 
     @override
     def update(self, dt: float):
+        if self.game_manager.overlay:
+            return
+        
         if self.teleport_cooldown > 0:
             self.teleport_cooldown -= dt
             

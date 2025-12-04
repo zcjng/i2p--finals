@@ -6,7 +6,7 @@ from src.scenes.scene import Scene
 from src.core import GameManager, OnlineManager
 from src.utils import Logger, PositionCamera, GameSettings, Position
 from src.core.services import sound_manager
-from src.sprites import Sprite
+from src.sprites import Sprite, Animation
 from typing import override
 from src.interface.components import Button
 from src.core.services import scene_manager, sound_manager, input_manager
@@ -38,8 +38,8 @@ class GameScene(Scene):
             self.online_manager = OnlineManager()
         else:
             self.online_manager = None
-        self.sprite_online = Sprite("ingame_ui/options1.png", (GameSettings.TILE_SIZE, GameSettings.TILE_SIZE))
-        
+        self.sprite_online = Sprite("character/ow1.png", (GameSettings.TILE_SIZE, GameSettings.TILE_SIZE))
+        self.online_player_sprites: dict[int, Animation] = {}
     def check_pc_interaction(self):
         """Check if player is near a PC and wants to interact"""
         if not self.game_manager.player:
@@ -140,10 +140,12 @@ class GameScene(Scene):
             
         
         if self.game_manager.player is not None and self.online_manager is not None:
+            direction = self.game_manager.player.direction.name.lower()
             _ = self.online_manager.update(
                 self.game_manager.player.position.x, 
                 self.game_manager.player.position.y,
-                self.game_manager.current_map.path_name
+                self.game_manager.current_map.path_name,
+                direction
             )
         
         
@@ -168,13 +170,67 @@ class GameScene(Scene):
         
         if self.online_manager and self.game_manager.player:
             list_online = self.online_manager.get_list_players()
-            for player in list_online:
-                if player["map"] == self.game_manager.current_map.path_name:
-                    cam = self.game_manager.player.camera
-                    pos = cam.transform_position_as_position(Position(player["x"], player["y"]))
-                    self.sprite_online.update_pos(pos)
-                    self.sprite_online.draw(screen)
-        
+            cam = self.game_manager.player.camera
+            
+            all_online_ids = {p.get("id") for p in list_online}
+            for player_data in list_online:
+                player_id = player_data.get("id", -1)
+                
+                # Create animation if it doesn't exist
+                if player_id not in self.online_player_sprites:
+                    # Create Animation using the same sprite as your player
+                    # Adjust these parameters to match your player's animation
+                    anim = Animation(
+                        "character/ow1.png",  # Your player sprite sheet
+                        rows=["down", "left", "right", "up"],  # Animation rows
+                        n_keyframes=4,  # Number of frames per row
+                        size=(GameSettings.TILE_SIZE, GameSettings.TILE_SIZE),
+                        loop=1.0  # Animation loop time in seconds
+                    )
+                    anim.prev_pos = Position(player_data["x"], player_data["y"])
+                    self.online_player_sprites[player_id] = anim
+                
+                    # Get the animation
+                anim = self.online_player_sprites[player_id]
+
+                if not hasattr(anim, "prev_pos"):
+                    anim.prev_pos = Position(player_data["x"], player_data["y"])
+
+    # Switch to correct direction
+                moving = (
+                    anim.prev_pos.x != player_data["x"] or
+                    anim.prev_pos.y != player_data["y"]
+                )
+
+    # Switch direction
+                direction = player_data.get("direction", "down")
+                anim.switch(direction)
+
+                # Update position
+                anim.update_pos(Position(player_data["x"], player_data["y"]))
+
+                # Update animation ONLY if moving
+                if moving:
+                    anim.update(0.04)  # advance animation frames
+                else:
+                    anim.frame_index = 0  # stop on first frame of current direction
+
+                # Draw
+                anim.draw(screen, cam)
+
+    # Save previous position
+                anim.prev_pos.x = player_data["x"]
+                anim.prev_pos.y = player_data["y"]
+
+            
+
+            # Remove any sprite that no longer exists on the server
+            players_to_remove = [
+                pid for pid, anim in self.online_player_sprites.items()
+                if pid not in all_online_ids
+            ]
+            for pid in players_to_remove:
+                del self.online_player_sprites[pid]
 
         self.game_manager.options.options_button.draw(screen)
         self.game_manager.bag.bag_button.draw(screen)
