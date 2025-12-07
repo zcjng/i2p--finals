@@ -121,16 +121,15 @@ class BattleScene(Scene):
             
     def sync_pokemon_to_bag(self):
         """Sync the battle pokemon's HP back to the bag"""
-        if not self.game_manager.bag._monsters_data:
+        if not self.game_manager.pokemon._monsters_data:  # ← Changed from bag
             return
         
-        # Find and update the player's pokemon in the bag
-        for monster in self.game_manager.bag._monsters_data:
+        # Find and update the player's pokemon in the party
+        for monster in self.game_manager.pokemon._monsters_data:  # ← Changed from bag
             if monster.get('name') == self.player.name:
-                monster['hp'] = max(0, self.player.hp)  # Ensure HP doesn't go negative
+                monster['hp'] = max(0, self.player.hp)
                 Logger.info(f"Updated {self.player.name} HP to {self.player.hp}")
                 break
-            
     def player_attack(self):
         if not self.waiting_input or not self.player_turn or self.battle_over:
             return
@@ -170,18 +169,16 @@ class BattleScene(Scene):
         caught_pokemon = enemy_pokemon.copy()
         caught_pokemon['hp'] = max(0, self.enemy.hp)
         
-        if self.game_manager.pc_storage.is_bag_full(self.game_manager.bag):
-            
+        if self.game_manager.pokemon.max_party_size <= len(self.game_manager.pokemon._monsters_data):  # ← Changed
             self.game_manager.pc_storage.deposit_pokemon(caught_pokemon)
-            self.set_message(f"Caught {self.enemy.name}! Sent to PC (Bag full)")
+            self.set_message(f"Caught {self.enemy.name}! Sent to PC (Party full)")
         else:
-
-            self.game_manager.bag._monsters_data.append(caught_pokemon)
+            self.game_manager.pokemon._monsters_data.append(caught_pokemon)  # ← Changed from bag
             self.set_message(f"You just caught {self.enemy.name}!")
             
         self.battle_over = True
         self.battle_end_timer = 2.0
-        
+            
     def set_message(self, message: str):
         """Set a new message and reset the typewriter effect"""
         self.message = message

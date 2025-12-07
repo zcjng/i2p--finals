@@ -9,8 +9,8 @@
           "destination": "gym.tmx"
         },
         {
-          "x":15,
-          "y":26,
+          "x": 15,
+          "y": 26,
           "destination": "house.tmx"
         }
       ],
@@ -41,7 +41,7 @@
           "max_tiles": 3
         }
       ],
-      "npc": []
+      "npcs": []
     },
     {
       "path": "gym.tmx",
@@ -67,7 +67,7 @@
         "y": 14.0
       },
       "enemy_trainers": [],
-      "npc": []
+      "npcs": []
     },
     {
       "path": "house.tmx",
@@ -80,10 +80,10 @@
       ],
       "player": {
         "x": 12.0,
-        "y": 14.0
+        "y": 12.0
       },
       "enemy_trainers": [],
-      "npc": [
+      "npcs": [
         {
           "x": 12.0,
           "y": 4.0,
@@ -97,10 +97,26 @@
   "current_map": "house.tmx",
   "player": {
     "x": 12.0,
-    "y": 14.0
+    "y": 12.0
   },
   "bag": {
-    "money" : 5000,
+    "items": [
+      {
+        "name": "Potion",
+        "count": 5,
+        "sprite_path": "ingame_ui/potion.png",
+        "category": "Medicine"
+      },
+      {
+        "name": "Pokeball",
+        "count": 10,
+        "sprite_path": "ingame_ui/ball.png",
+        "category": "Poke Balls"
+      }
+    ],
+    "money": 5000
+  },
+  "pokemon": {
     "monsters": [
       {
         "name": "Pikachu",
@@ -108,7 +124,8 @@
         "max_hp": 100,
         "level": 25,
         "sprite_path": "menu_sprites/menusprite1.png",
-        "battle_sprite": "sprites/sprite1.png"
+        "battle_sprite": "sprites/sprite1.png",
+        "idle":"sprites/sprite1_idle.png"
       },
       {
         "name": "Charizard",
@@ -116,7 +133,8 @@
         "max_hp": 200,
         "level": 36,
         "sprite_path": "menu_sprites/menusprite2.png",
-        "battle_sprite": "sprites/sprite2.png"
+        "battle_sprite": "sprites/sprite2.png",
+        "idle":"sprites/sprite2_idle.png"
       },
       {
         "name": "Blastoise",
@@ -124,7 +142,8 @@
         "max_hp": 180,
         "level": 32,
         "sprite_path": "menu_sprites/menusprite3.png",
-        "battle_sprite": "sprites/sprite3.png"
+        "battle_sprite": "sprites/sprite3.png",
+        "idle":"sprites/sprite3_idle.png"
       },
       {
         "name": "Venusaur",
@@ -132,7 +151,8 @@
         "max_hp": 160,
         "level": 30,
         "sprite_path": "menu_sprites/menusprite4.png",
-        "battle_sprite": "sprites/sprite4.png"
+        "battle_sprite": "sprites/sprite4.png",
+        "idle":"sprites/sprite4_idle.png"
       },
       {
         "name": "Gengar",
@@ -140,19 +160,8 @@
         "max_hp": 140,
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
-        "battle_sprite": "sprites/sprite5.png"
-      }
-    ],
-    "items": [
-      {
-        "name": "Potion",
-        "count": 5,
-        "sprite_path": "ingame_ui/potion.png"
-      },
-      {
-        "name": "Pokeball",
-        "count": 10,
-        "sprite_path": "ingame_ui/ball.png"
+        "battle_sprite": "sprites/sprite5.png",
+        "idle":"sprites/sprite5_idle.png"
       }
     ]
   },
@@ -165,7 +174,8 @@
         "max_hp": 220,
         "level": 40,
         "sprite_path": "menu_sprites/menusprite6.png",
-        "battle_sprite": "sprites/sprite6.png"
+        "battle_sprite": "sprites/sprite6.png",
+        "idle":"sprites/sprite6_idle.png"
       },
       {
         "name": "Dragonite",
@@ -173,7 +183,8 @@
         "max_hp": 220,
         "level": 40,
         "sprite_path": "menu_sprites/menusprite6.png",
-        "battle_sprite": "sprites/sprite6.png"
+        "battle_sprite": "sprites/sprite6.png",
+        "idle":"sprites/sprite6_idle.png"
       },
       {
         "name": "Venusaur",
@@ -181,7 +192,8 @@
         "max_hp": 160,
         "level": 30,
         "sprite_path": "menu_sprites/menusprite4.png",
-        "battle_sprite": "sprites/sprite4.png"
+        "battle_sprite": "sprites/sprite4.png",
+        "idle":"sprites/sprite4_idle.png"
       },
       {
         "name": "Gengar",
@@ -189,7 +201,8 @@
         "max_hp": 140,
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
-        "battle_sprite": "sprites/sprite5.png"
+        "battle_sprite": "sprites/sprite5.png",
+        "idle":"sprites/sprite5_idle.png"
       },
       {
         "name": "Gengar",
@@ -197,7 +210,8 @@
         "max_hp": 140,
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
-        "battle_sprite": "sprites/sprite5.png"
+        "battle_sprite": "sprites/sprite5.png",
+        "idle":"sprites/sprite5_idle.png"
       },
       {
         "name": "Gengar",
@@ -205,7 +219,8 @@
         "max_hp": 140,
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
-        "battle_sprite": "sprites/sprite5.png"
+        "battle_sprite": "sprites/sprite5.png",
+        "idle":"sprites/sprite5_idle.png"
       },
       {
         "name": "Gengar",
@@ -213,7 +228,8 @@
         "max_hp": 140,
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
-        "battle_sprite": "sprites/sprite5.png"
+        "battle_sprite": "sprites/sprite5.png",
+        "idle":"sprites/sprite5_idle.png"
       },
       {
         "name": "Gengar",
@@ -221,7 +237,8 @@
         "max_hp": 140,
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
-        "battle_sprite": "sprites/sprite5.png"
+        "battle_sprite": "sprites/sprite5.png",
+        "idle":"sprites/sprite5_idle.png"
       }
     ]
   }

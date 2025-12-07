@@ -17,12 +17,17 @@ class Animation(Sprite):
         self, image_path: str,
         rows: list[str], n_keyframes: int,  # Row x Column for grids
         size: tuple[int, int],              # Size of the animation in rendering
-        loop: float = 1                     # loop in second
+        loop: float = 1,                    # loop in second
+        vertical: bool = False
     ):
         super().__init__(image_path)
         sheet_w, sheet_h = self.image.get_size()
-        frame_w = sheet_w // n_keyframes
-        frame_h = sheet_h // len(rows)
+        if vertical:
+            frame_w = sheet_w 
+            frame_h = sheet_h // n_keyframes
+        else:
+            frame_w = sheet_w // n_keyframes
+            frame_h = sheet_h // len(rows)
         
         if (len(rows) <= 0 or n_keyframes <= 0):
             Logger.error("Invalid number of rows")
@@ -31,10 +36,16 @@ class Animation(Sprite):
         for r, name in enumerate(rows):
             anim : list[pg.Surface] = []
             for c in range(n_keyframes):
-                frame = self.image.subsurface(pg.Rect(
-                    c * frame_w, r * frame_h,
-                    frame_w, frame_h
-                ))
+                if vertical:
+                    frame = self.image.subsurface(pg.Rect(
+                                0, c * frame_h,
+                                frame_w, frame_h
+                                ))
+                else:
+                    frame = self.image.subsurface(pg.Rect(
+                        c * frame_w, r * frame_h,
+                        frame_w, frame_h
+                    ))
                 anim.append(pg.transform.smoothscale(frame, size))
             self.animations[name] = anim
             

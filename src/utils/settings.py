@@ -14,7 +14,7 @@ class Settings:
     MAX_CHANNELS: int = 16
     AUDIO_VOLUME: float = 0  # Volume of audio
     # Online
-    IS_ONLINE: bool = True
+    IS_ONLINE: bool = False
     IS_MUTE: bool = False
     ONLINE_SERVER_URL: str = "http://localhost:8989"
     TELEPORTING: bool = False

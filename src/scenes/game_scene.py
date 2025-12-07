@@ -10,7 +10,7 @@ from src.sprites import Sprite, Animation
 from typing import override
 from src.interface.components import Button
 from src.core.services import scene_manager, sound_manager, input_manager
-
+from src.interface.menu import Menu
 
 class GameScene(Scene):
     game_manager: GameManager
@@ -30,8 +30,11 @@ class GameScene(Scene):
                 exit(1)
             self.game_manager = manager
 
-        self.game_manager.options.set_save_callback(self.save_game)
-        self.game_manager.options.set_load_callback(self.load_game)
+        self.menu = Menu(self.game_manager)
+        self.menu.set_save_callback(self.save_game)
+        self.menu.set_load_callback(self.load_game)
+        
+        
         
         # Online Manager
         if GameSettings.IS_ONLINE:
@@ -68,8 +71,7 @@ class GameScene(Scene):
         if loaded_gm:
             self.game_manager = loaded_gm
             
-            self.game_manager.options.set_save_callback(self.save_game)
-            self.game_manager.options.set_load_callback(self.load_game)
+            self.menu.game_manager = loaded_gm
             
             Logger.info('Game loaded successfully')
         else:
@@ -93,8 +95,23 @@ class GameScene(Scene):
         
 
         # Update player and other data
-
-        if not self.game_manager.options.overlay and not self.game_manager.bag.overlay and not self.game_manager.pc_storage.is_open:
+        if input_manager.key_pressed(pg.K_x) or input_manager.key_pressed(pg.K_ESCAPE):
+            if not self.menu.overlay and not self.game_manager.bag.overlay and not self.game_manager.pokemon.overlay and not self.game_manager.options.overlay:
+                self.menu.toggle()
+                
+        if self.menu.overlay:
+            self.menu.update(dt)
+            
+        elif self.game_manager.pc_storage.is_open:
+            self.game_manager.pc_storage.update(dt)
+        elif self.game_manager.options.overlay:
+            self.game_manager.options.update(dt)
+        elif self.game_manager.bag.overlay:
+            self.game_manager.bag.update(dt)
+        elif self.game_manager.pokemon.overlay:  # ← ADD THIS
+            self.game_manager.pokemon.update(dt)
+        else:
+            # Normal gameplay
             self.game_manager.map_transition(dt)
             self.check_pc_interaction()
             # Update others
@@ -124,16 +141,9 @@ class GameScene(Scene):
                     npc.update(dt)
                 
             
-        if self.game_manager.pc_storage.is_open:
-            self.game_manager.pc_storage.update(dt)
-        elif self.game_manager.options.overlay:
-            self.game_manager.options.update(dt)  # updates ALL buttons and slider
-        elif self.game_manager.bag.overlay:
-            self.game_manager.bag.update(dt)
-        else:
-            # normal update
-            self.game_manager.options.update(dt)
-            self.game_manager.bag.update(dt)
+        
+                
+        
             
 
             
@@ -232,21 +242,24 @@ class GameScene(Scene):
             for pid in players_to_remove:
                 del self.online_player_sprites[pid]
 
-        self.game_manager.options.options_button.draw(screen)
-        self.game_manager.bag.bag_button.draw(screen)
         
         # Then draw overlays (which cover the buttons with dim effect)
-        if self.game_manager.options.overlay:
-            screen.blit(self.game_manager.options.dim_overlay, (0, 0))
-
-            self.game_manager.options.draw(screen)
-            self.game_manager.options.close_button.draw(screen)
-            
+        if self.game_manager.pokemon.overlay:  # ← ADD THIS FIRST
+            screen.blit(self.game_manager.pokemon.dim_overlay, (0, 0))
+            self.game_manager.pokemon.draw(screen)
+        
         if self.game_manager.bag.overlay:
             screen.blit(self.game_manager.bag.dim_overlay, (0, 0))
             self.game_manager.bag.draw(screen)
-            self.game_manager.bag.close_button.draw(screen)
+
         
+        if self.game_manager.options.overlay:
+            screen.blit(self.game_manager.options.dim_overlay, (0, 0))
+            self.game_manager.options.draw(screen)
+            self.game_manager.options.close_button.draw(screen)
+        
+        if self.menu.overlay:
+            self.menu.draw(screen)
         
         if self.game_manager._transitioning and self.game_manager._transition_surface:
             screen.blit(self.game_manager._transition_surface, (0, 0))

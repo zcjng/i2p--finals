@@ -1,0 +1,17 @@
+Things that I want to improve:
+1. UI:
+Main Menu UI,
+XBag UI, (needs some more reworks but its solid) 
+XOptions UI (its pretty solid but also has something missing),
+BattleScene UI
+XPokemon UI (pretty solid aswell, just need the pokemon type and matchups to complete)
+
+2. Gameplay
+Implement attack variations 
+Implement elements
+Implement bag
+
+Make animations 
+
+Priorities:
+Bag -> BattleScene UI -> Battle elements and attack variations

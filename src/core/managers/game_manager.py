@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from src.entities.enemy_trainer import EnemyTrainer
     from src.entities.npc import NPC
     from src.data.bag import Bag
+    from src.data.pokemon import Pokemon
 
 
 class GameManager:
@@ -21,6 +22,7 @@ class GameManager:
     npcs: dict[str, list[NPC]]
     bag: "Bag"
     options: "Options"
+    pokemon: "Pokemon"
     
     # Map properties
     current_map_key: str
@@ -39,10 +41,12 @@ class GameManager:
                  enemy_trainers: dict[str, list[EnemyTrainer]], 
                  npcs: dict[str, list[NPC]],
                  bag: Bag | None = None,
+                 pokemon: Pokemon | None = None,
                  options: Options | None = None,
                  pc_storage = None):
                      
         from src.data.bag import Bag
+        from src.data.pokemon import Pokemon
         from src.data.pc import PCStorage
         # Game Properties
         self.maps = maps
@@ -51,6 +55,7 @@ class GameManager:
         self.enemy_trainers = enemy_trainers
         self.npcs = npcs
         self.bag = bag if bag is not None else Bag([], [])
+        self.pokemon = pokemon if pokemon is not None else Pokemon([])
         self.options = options if options is not None else Options()
         self.pc_storage = pc_storage if pc_storage is not None else PCStorage()
         self.steps_per_check = 1
@@ -197,27 +202,53 @@ class GameManager:
     def get_random_wild_pokemon(self):
         area_pokemon = {
             "map3.tmx" : [
-                { "name": "Venusaur",  "hp": 160,  "max_hp": 160, "level": 30, "sprite_path": "menu_sprites/menusprite4.png", "battle_sprite": "sprites/sprite4.png"},
-                { "name": "Gengar",    "hp": 140, "max_hp": 140, "level": 28, "sprite_path": "menu_sprites/menusprite5.png", "battle_sprite": "sprites/sprite5.png"},
-                { "name": "Dragonite", "hp": 220, "max_hp": 220, "level": 40, "sprite_path": "menu_sprites/menusprite6.png", "battle_sprite": "sprites/sprite6.png"}
-            ]
+            { 
+                "name": "Venusaur",  
+                "hp": 160,  
+                "max_hp": 160, 
+                "level": 30, 
+                "sprite_path": "menu_sprites/menusprite4.png", 
+                "battle_sprite": "sprites/sprite4.png",
+                "idle": "sprites/sprite4_idle.png"  # ADD THIS
+            },
+            { 
+                "name": "Gengar",    
+                "hp": 140, 
+                "max_hp": 140, 
+                "level": 28, 
+                "sprite_path": "menu_sprites/menusprite5.png", 
+                "battle_sprite": "sprites/sprite5.png",
+                "idle": "sprites/sprite5_idle.png"  # ADD THIS
+            },
+            { 
+                "name": "Dragonite", 
+                "hp": 220, 
+                "max_hp": 220, 
+                "level": 40, 
+                "sprite_path": "menu_sprites/menusprite6.png", 
+                "battle_sprite": "sprites/sprite6.png",
+                "idle": "sprites/sprite6_idle.png"  # ADD THIS
+            }
+        ]
         }
 
         pokemon_list = area_pokemon.get(self.current_map_key, [])
         if not pokemon_list:
-            return {"name": "Venusaur",  "hp": 160,  "max_hp": 160, "level": 30, "sprite_path": "menu_sprites/menusprite4.png", "battle_sprite": "sprites/sprite4.png"}
+            return {
+            "name": "Venusaur",  
+            "hp": 160,  
+            "max_hp": 160, 
+            "level": 30, 
+            "sprite_path": "menu_sprites/menusprite4.png", 
+            "battle_sprite": "sprites/sprite4.png",
+            "idle": "sprites/sprite4_idle.png"  # ADD THIS TO DEFAULT TOO
+        }
         
         return random.choice(pokemon_list)
     
     def get_player_lead_pokemon(self):
-        if not self.bag._monsters_data:
-            return None
-        
-        for monster in self.bag._monsters_data:
-            if monster.get('hp', 0) > 0:
-                return monster
-            
-        return None
+        """Get the first pokemon with HP > 0 from the pokemon party"""
+        return self.pokemon.get_lead_pokemon()
     
     def save(self, path: str):
         try:
@@ -259,6 +290,7 @@ class GameManager:
             "current_map": self.current_map_key,
             "player": self.player.to_dict() if self.player is not None else None,
             "bag": self.bag.to_dict(),
+            "pokemon": self.pokemon.to_dict(),
             "options": {},
             "pc_storage": self.pc_storage.to_dict()
         }
@@ -271,6 +303,7 @@ class GameManager:
         from src.entities.npc import NPC
         from src.data.bag import Bag
         from src.data.pc import PCStorage
+        from src.data.pokemon import Pokemon
         
         Logger.info("Loading maps")
         maps_data = data["map"]
@@ -294,13 +327,14 @@ class GameManager:
             None, # Player
             trainers,
             npc,
-            bag=None
+            bag=None,
+            pokemon=None
         )
         gm.current_map_key = current_map
         
         Logger.info("Loading enemy trainers")
         for m in data["map"]:
-            raw_data = m["enemy_trainers"]
+            raw_data = m.get("enemy_trainers", [])
             gm.enemy_trainers[m["path"]] = [EnemyTrainer.from_dict(t, gm) for t in raw_data]
         
         Logger.info("Loading Player")
@@ -309,13 +343,17 @@ class GameManager:
             
         Logger.info("Loading NPCs")
         for m in data["map"]:
-            raw_data = m["npc"]
+            raw_data = m.get("npcs", [])
             gm.npcs[m["path"]] = [NPC.from_dict(t, gm) for t in raw_data]
         
         Logger.info("Loading bag")
         from src.data.bag import Bag as _Bag
         gm.bag = Bag.from_dict(data.get("bag", {})) if data.get("bag") else _Bag([], [])
         gm.options = Options()
+        
+        Logger.info("Loading pokemon party")
+        from src.data.pokemon import Pokemon as _Pokemon
+        gm.pokemon = Pokemon.from_dict(data.get("pokemon", {})) if data.get("pokemon") else _Pokemon([])
         
         Logger.info("Loading PC Storage")
         gm.pc_storage = PCStorage.from_dict(data.get("pc_storage", {})) if data.get("pc_storage") else PCStorage()
