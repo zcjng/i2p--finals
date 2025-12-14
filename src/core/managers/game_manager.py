@@ -48,16 +48,22 @@ class GameManager:
         from src.data.bag import Bag
         from src.data.pokemon import Pokemon
         from src.data.pc import PCStorage
+        from src.data.townmap import TownMap
         # Game Properties
         self.maps = maps
+        self.townmap = TownMap(self)
         self.current_map_key = start_map
         self.player = player
         self.enemy_trainers = enemy_trainers
         self.npcs = npcs
-        self.bag = bag if bag is not None else Bag([], [])
-        self.pokemon = pokemon if pokemon is not None else Pokemon([])
-        self.options = options if options is not None else Options()
+        self.bag = bag if bag is not None else Bag([], [], self)
+        self.bag.game_manager = self
+        self.pokemon = pokemon if pokemon is not None else Pokemon([], self)
+        self.pokemon.game_manager = self
+        self.options = options if options is not None else Options(self)
+        self.options.game_manager = self
         self.pc_storage = pc_storage if pc_storage is not None else PCStorage()
+        
         self.steps_per_check = 1
         self.steps_last = 0
         self.encounter_rate = 0.2
@@ -304,6 +310,7 @@ class GameManager:
         from src.data.bag import Bag
         from src.data.pc import PCStorage
         from src.data.pokemon import Pokemon
+        from src.interface.menu import Menu
         
         Logger.info("Loading maps")
         maps_data = data["map"]
@@ -332,6 +339,8 @@ class GameManager:
         )
         gm.current_map_key = current_map
         
+        gm.menu = Menu(gm)
+        
         Logger.info("Loading enemy trainers")
         for m in data["map"]:
             raw_data = m.get("enemy_trainers", [])
@@ -349,11 +358,13 @@ class GameManager:
         Logger.info("Loading bag")
         from src.data.bag import Bag as _Bag
         gm.bag = Bag.from_dict(data.get("bag", {})) if data.get("bag") else _Bag([], [])
-        gm.options = Options()
+        gm.options = Options(gm)
+        gm.bag.game_manager = gm
         
         Logger.info("Loading pokemon party")
         from src.data.pokemon import Pokemon as _Pokemon
         gm.pokemon = Pokemon.from_dict(data.get("pokemon", {})) if data.get("pokemon") else _Pokemon([])
+        gm.pokemon.game_manager = gm
         
         Logger.info("Loading PC Storage")
         gm.pc_storage = PCStorage.from_dict(data.get("pc_storage", {})) if data.get("pc_storage") else PCStorage()

@@ -12,7 +12,7 @@ from src.sprites import Sprite, Animation
 class Pokemon:
     _monsters_data: list[Monster]
     
-    def __init__(self, monsters_data: list[Monster] | None = None):
+    def __init__(self, monsters_data: list[Monster] | None = None, game_manager = None):
         self._monsters_data = monsters_data if monsters_data else []
         self.overlay = False
         self.max_party_size = 6
@@ -41,6 +41,9 @@ class Pokemon:
         self.quit_overlay = pg.Surface((265, 80))  # <-- size you want
         self.quit_overlay.fill((255, 255, 255))
         self.quit_overlay.set_alpha(int(255 * 0.2))
+        
+        self.opened_from_menu = False
+        self.game_manager = game_manager
         
     def update_sprites(self):
         """Update the background and UI sprites"""
@@ -302,6 +305,11 @@ class Pokemon:
 
     def close(self):
         self.overlay = False
+        self.selected_pokemon_index = 0 
+        if self.opened_from_menu:
+            self.opened_from_menu = False
+            
+            self.game_manager.menu.open()
 
     def to_dict(self):
         return {

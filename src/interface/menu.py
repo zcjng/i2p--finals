@@ -23,6 +23,7 @@ class Menu:
         button_y_start = py - 300
         button_spacing = 130
         
+        
         self.pokemon_button = Button(
             "UI/Pokemon.png", "UI/Pokemon.png",
             button_x, button_y_start, 300, 80,
@@ -53,6 +54,12 @@ class Menu:
             lambda: self.open_options()
         )
         
+        self.close_button = Button(
+            "UI/Close.png", "UI/Close.png",
+            button_x - 900, button_y_start - 20, 300, 150,
+            lambda: self.close()
+        )
+        
         # Selector sprite
         self.selector = Animation(
             "UI/Flecha.png",
@@ -69,17 +76,19 @@ class Menu:
             self.bag_button,
             self.save_button,
             self.load_button,
-            self.options_button
+            self.options_button,
+            self.close_button
         ]
         self.button_positions = [
             (button_x, button_y_start),
             (button_x, button_y_start + button_spacing),
             (button_x, button_y_start + button_spacing * 2),
             (button_x, button_y_start + button_spacing * 3),
-            (button_x, button_y_start + button_spacing * 4)
+            (button_x, button_y_start + button_spacing * 4),
+            (button_x - 900, button_y_start - 20)
         ]
         self.selected_index = 0
-        
+        self.saved_index = 0
         # Brightness overlay for selected button
         self.brightness_overlay = pg.Surface((300, 80))
         self.brightness_overlay.fill((255, 255, 255))
@@ -110,15 +119,18 @@ class Menu:
     
     def open_pokemon(self):
         # TODO: Open Pokemon party screen
+        self.game_manager.pokemon.opened_from_menu = True
         self.close()
         self.game_manager.pokemon.open()
         
     
     def open_bag(self):
+        self.game_manager.bag.opened_from_menu = True
         self.close()
         self.game_manager.bag.open()
     
     def open_options(self):
+        self.game_manager.options.opened_from_menu = True
         self.close()
         self.game_manager.options.open()
     
@@ -139,7 +151,17 @@ class Menu:
         # Navigate down
         if input_manager.key_pressed(pg.K_DOWN) or input_manager.key_pressed(pg.K_s):
             self.selected_index = (self.selected_index + 1) % len(self.buttons)
-        
+            
+        if input_manager.key_pressed(pg.K_LEFT) or input_manager.key_pressed(pg.K_a):
+            self.saved_index = self.selected_index
+            index = (self.selected_index + 5)
+            print(index)
+            if index >= 5:
+                index = 5
+                self.selected_index = index
+                
+        if input_manager.key_pressed(pg.K_RIGHT) or input_manager.key_pressed(pg.K_d):
+            self.selected_index = self.saved_index
         # Select/activate button
         if input_manager.key_pressed(pg.K_RETURN) or input_manager.key_pressed(pg.K_e) or input_manager.key_pressed(pg.K_SPACE):
             self.buttons[self.selected_index].on_click()
@@ -156,6 +178,7 @@ class Menu:
             self.save_button.update(dt)
             self.load_button.update(dt)
             self.options_button.update(dt)
+            self.close_button.update(dt)
     
     def draw(self, screen: pg.Surface):
         if self.overlay:
@@ -168,10 +191,21 @@ class Menu:
             self.save_button.draw(screen)
             self.load_button.draw(screen)
             self.options_button.draw(screen)
+            self.close_button.draw(screen)
             
             # Draw brightness overlay on selected button
             button_x, button_y = self.button_positions[self.selected_index]
-            screen.blit(self.brightness_overlay, (button_x, button_y))
+            
+            if self.selected_index == 5:
+                self.brightness_overlay = pg.Surface((75, 75))
+                self.brightness_overlay.fill((255, 255, 255))
+                self.brightness_overlay.set_alpha(int(255 * 0.15))  # 15% brightness increase
+                screen.blit(self.brightness_overlay, (button_x, button_y))
+            else:
+                self.brightness_overlay = pg.Surface((300, 80))
+                self.brightness_overlay.fill((255, 255, 255))
+                self.brightness_overlay.set_alpha(int(255 * 0.15))  # 15% brightness increase
+                screen.blit(self.brightness_overlay, (button_x, button_y))
             
             # Draw selector next to selected button
             selector_x = button_x - 70  # Position to the left of button

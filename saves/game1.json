@@ -15,7 +15,7 @@
         }
       ],
       "player": {
-        "x": 16.0,
+        "x": 21.0,
         "y": 28.0
       },
       "enemy_trainers": [
@@ -94,10 +94,10 @@
       ]
     }
   ],
-  "current_map": "house.tmx",
+  "current_map": "map3.tmx",
   "player": {
-    "x": 12.0,
-    "y": 12.0
+    "x": 21.0,
+    "y": 28.0
   },
   "bag": {
     "items": [
@@ -108,10 +108,28 @@
         "category": "Medicine"
       },
       {
+        "name": "Town Map",
+        "count": 1,
+        "sprite_path": "ingame_ui/potion.png",
+        "category": "Key Items"
+      },
+      {
         "name": "Pokeball",
         "count": 10,
         "sprite_path": "ingame_ui/ball.png",
         "category": "Poke Balls"
+      },
+      {
+        "name": "Strength Potion",
+        "count": 2,
+        "sprite_path": "ingame_ui/options5.png",
+        "category": "Medicine"
+      },
+      {
+        "name": "Defense Potion",
+        "count": 3,
+        "sprite_path": "ingame_ui/options6.png",
+        "category": "Medicine"
       }
     ],
     "money": 5000
@@ -125,7 +143,7 @@
         "level": 25,
         "sprite_path": "menu_sprites/menusprite1.png",
         "battle_sprite": "sprites/sprite1.png",
-        "idle":"sprites/sprite1_idle.png"
+        "idle": "sprites/sprite1_idle.png"
       },
       {
         "name": "Charizard",
@@ -134,7 +152,7 @@
         "level": 36,
         "sprite_path": "menu_sprites/menusprite2.png",
         "battle_sprite": "sprites/sprite2.png",
-        "idle":"sprites/sprite2_idle.png"
+        "idle": "sprites/sprite2_idle.png"
       },
       {
         "name": "Blastoise",
@@ -143,7 +161,7 @@
         "level": 32,
         "sprite_path": "menu_sprites/menusprite3.png",
         "battle_sprite": "sprites/sprite3.png",
-        "idle":"sprites/sprite3_idle.png"
+        "idle": "sprites/sprite3_idle.png"
       },
       {
         "name": "Venusaur",
@@ -152,7 +170,7 @@
         "level": 30,
         "sprite_path": "menu_sprites/menusprite4.png",
         "battle_sprite": "sprites/sprite4.png",
-        "idle":"sprites/sprite4_idle.png"
+        "idle": "sprites/sprite4_idle.png"
       },
       {
         "name": "Gengar",
@@ -161,7 +179,7 @@
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
         "battle_sprite": "sprites/sprite5.png",
-        "idle":"sprites/sprite5_idle.png"
+        "idle": "sprites/sprite5_idle.png"
       }
     ]
   },
@@ -175,7 +193,7 @@
         "level": 40,
         "sprite_path": "menu_sprites/menusprite6.png",
         "battle_sprite": "sprites/sprite6.png",
-        "idle":"sprites/sprite6_idle.png"
+        "idle": "sprites/sprite6_idle.png"
       },
       {
         "name": "Dragonite",
@@ -184,7 +202,7 @@
         "level": 40,
         "sprite_path": "menu_sprites/menusprite6.png",
         "battle_sprite": "sprites/sprite6.png",
-        "idle":"sprites/sprite6_idle.png"
+        "idle": "sprites/sprite6_idle.png"
       },
       {
         "name": "Venusaur",
@@ -193,7 +211,7 @@
         "level": 30,
         "sprite_path": "menu_sprites/menusprite4.png",
         "battle_sprite": "sprites/sprite4.png",
-        "idle":"sprites/sprite4_idle.png"
+        "idle": "sprites/sprite4_idle.png"
       },
       {
         "name": "Gengar",
@@ -202,7 +220,7 @@
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
         "battle_sprite": "sprites/sprite5.png",
-        "idle":"sprites/sprite5_idle.png"
+        "idle": "sprites/sprite5_idle.png"
       },
       {
         "name": "Gengar",
@@ -211,7 +229,7 @@
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
         "battle_sprite": "sprites/sprite5.png",
-        "idle":"sprites/sprite5_idle.png"
+        "idle": "sprites/sprite5_idle.png"
       },
       {
         "name": "Gengar",
@@ -220,7 +238,7 @@
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
         "battle_sprite": "sprites/sprite5.png",
-        "idle":"sprites/sprite5_idle.png"
+        "idle": "sprites/sprite5_idle.png"
       },
       {
         "name": "Gengar",
@@ -229,7 +247,7 @@
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
         "battle_sprite": "sprites/sprite5.png",
-        "idle":"sprites/sprite5_idle.png"
+        "idle": "sprites/sprite5_idle.png"
       },
       {
         "name": "Gengar",
@@ -238,7 +256,7 @@
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
         "battle_sprite": "sprites/sprite5.png",
-        "idle":"sprites/sprite5_idle.png"
+        "idle": "sprites/sprite5_idle.png"
       }
     ]
   }

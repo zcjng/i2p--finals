@@ -10,11 +10,13 @@ from src.sprites import Sprite, Animation
 class Bag:
     _items_data: list[Item]
     
-    def __init__(self, items_data: list[Item] | None = None, money: int = 0):
+    def __init__(self, items_data: list[Item] | None = None, money: int = 0, game_manager = None):
         self._items_data = items_data if items_data else []
         self.money = money  
         self.overlay = False
-        
+        self.item_used = None
+        self.opened_from_menu = False
+        self.game_manager = game_manager
         # Category system
         self.categories = [
             {"name": "Items", "bag_icon": "bag_1", "bg": "bg_1"},
@@ -60,11 +62,11 @@ class Bag:
         
         # Load bag icon (optional, if you want to display it)
         self.bag_icon = Sprite(f"Bag/{current_cat['bag_icon']}.PNG", (300, 300))
-        self.bag_bar = Sprite(f"Bag/bag_bar.png", (GameSettings.SCREEN_WIDTH, 200))
+        self.bag_bar = Sprite(f"Bag/bar_bar_cool.png", (GameSettings.SCREEN_WIDTH, 200))
         
         # Load cursor selector
         self.cursor = Sprite(f"Bag/cursor.png", (570, 110))
-        self.category_bar = Sprite(f"Bag/category_bar.png", (350, 90))
+        self.category_bar = Sprite(f"Bag/category_bar_cool.png", (350, 90))
         
         self.left_arrow = Animation(
             "Bag/leftarrow.png",
@@ -114,7 +116,7 @@ class Bag:
             selected_item = current_items[self.selected_item_index]
             sprite_path = selected_item.get("sprite_path")
             if sprite_path:
-                self.selected_item_sprite = Sprite(sprite_path, (80, 80))  # <- Creates sprite
+                self.selected_item_sprite = Sprite(sprite_path, (60, 60))  # <- Creates sprite
             else:
                 self.selected_item_sprite = None
         else:
@@ -202,10 +204,25 @@ class Bag:
         if input_manager.key_pressed(pg.K_RETURN) or input_manager.key_pressed(pg.K_e):
             if self.selected_item_index == max_index:
                 # Selected CLOSE BAG
-                self.close()
+                self.close(reopen_menu=True)
             else:
-                # Selected an item - you can add item usage logic here
-                pass
+            # An item was selected
+                selected_item = current_items[self.selected_item_index]
+                
+                # Town Map can only be used from menu
+                if selected_item["name"] == "Town Map":
+                    if self.opened_from_menu:
+                        self.game_manager.townmap.opened_from_menu = False
+                        self.close(reopen_menu=False)
+                        self.game_manager.townmap.open()
+                    # If not from menu (in battle), do nothing
+                
+                # Other items can only be used in battle
+                elif not self.opened_from_menu:
+                    self.item_used = True  # Signal BattleScene
+                    self.close()
+
+        
         
         # Close bag with ESC
         if input_manager.key_pressed(pg.K_ESCAPE):
@@ -240,8 +257,8 @@ class Bag:
         
         # Draw category name
         current_category = self.categories[self.current_category_index]["name"]
-        category_text = self.font_category.render(current_category, True, (70,70,70))
-        category_shadow = self.font_category.render(current_category, True, (150, 150, 150))
+        category_text = self.font_category.render(current_category, True, (255,255,255))
+        category_shadow = self.font_category.render(current_category, True, (0, 0, 0))
         text_width = category_text.get_width()
         center_x = GameSettings.SCREEN_WIDTH // 2 - 385 - text_width // 2
 
@@ -309,16 +326,22 @@ class Bag:
         
         # Draw selected item sprite (display area on the left side)
         if self.selected_item_sprite:
-            sprite_x = GameSettings.SCREEN_WIDTH // 2 - 381  # <- Position X
+            sprite_x = GameSettings.SCREEN_WIDTH // 2 - 440  # <- Position X
             sprite_y = GameSettings.SCREEN_HEIGHT // 2 + 280  # <- Position Y
             self.selected_item_sprite.rect.center = (sprite_x, sprite_y)
             self.selected_item_sprite.draw(screen)
     def open(self):
         self.overlay = True
         self.update_selected_item_sprite()
+        self.item_used = None
 
-    def close(self):
+    def close(self, reopen_menu):
         self.overlay = False
+        if self.opened_from_menu and reopen_menu:
+            self.opened_from_menu = False
+            self.game_manager.menu.open()
+        elif self.opened_from_menu:
+            self.opened_from_menu = False
 
     def to_dict(self):
         return {

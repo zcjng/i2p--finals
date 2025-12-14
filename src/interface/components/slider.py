@@ -28,7 +28,7 @@ class Slider(UIComponent):
         self.dragging = False
         
         self.track_sprite = Sprite(track_sprite_path, (width, height))
-        handle_size = height * 1.5
+        handle_size = height * 1.2
         self.handle_sprite = Sprite(handle_sprite_path, (handle_size, handle_size))
         self.handle_radius = handle_size // 1.7
         

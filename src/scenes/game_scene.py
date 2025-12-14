@@ -11,6 +11,7 @@ from typing import override
 from src.interface.components import Button
 from src.core.services import scene_manager, sound_manager, input_manager
 from src.interface.menu import Menu
+from src.interface.minimap import Minimap
 
 class GameScene(Scene):
     game_manager: GameManager
@@ -31,10 +32,11 @@ class GameScene(Scene):
             self.game_manager = manager
 
         self.menu = Menu(self.game_manager)
+        self.game_manager.menu = self.menu
         self.menu.set_save_callback(self.save_game)
         self.menu.set_load_callback(self.load_game)
         
-        
+        self.minimap = Minimap(size=150, padding=10)
         
         # Online Manager
         if GameSettings.IS_ONLINE:
@@ -110,6 +112,8 @@ class GameScene(Scene):
             self.game_manager.bag.update(dt)
         elif self.game_manager.pokemon.overlay:  # ← ADD THIS
             self.game_manager.pokemon.update(dt)
+        elif self.game_manager.townmap.overlay:
+            self.game_manager.townmap.update(dt)
         else:
             # Normal gameplay
             self.game_manager.map_transition(dt)
@@ -164,7 +168,6 @@ class GameScene(Scene):
         player = self.game_manager.player
                 
         if self.game_manager.player:
-            
             
             camera = self.game_manager.player.camera
             self.game_manager.current_map.draw(screen, camera)
@@ -243,6 +246,22 @@ class GameScene(Scene):
                 del self.online_player_sprites[pid]
 
         
+        if self.game_manager.player:
+            self.minimap.draw(
+                    screen, 
+                    self.game_manager.player.position,
+                    self.game_manager.current_map,
+                    self.game_manager.current_map_key
+                )
+            
+        if self.game_manager.player:
+                self.game_manager.townmap.draw_navigation_arrows(screen, camera)
+
+        # Draw town map overlay
+        if self.game_manager.townmap.overlay:
+            screen.blit(self.game_manager.townmap.dim_overlay, (0, 0))
+            self.game_manager.townmap.draw(screen)
+    
         # Then draw overlays (which cover the buttons with dim effect)
         if self.game_manager.pokemon.overlay:  # ← ADD THIS FIRST
             screen.blit(self.game_manager.pokemon.dim_overlay, (0, 0))
