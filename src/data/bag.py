@@ -220,7 +220,7 @@ class Bag:
                 # Other items can only be used in battle
                 elif not self.opened_from_menu:
                     self.item_used = True  # Signal BattleScene
-                    self.close()
+                    self.close(False)
 
         
         
