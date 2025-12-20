@@ -17,6 +17,7 @@ class Bag:
         self.item_used = None
         self.opened_from_menu = False
         self.game_manager = game_manager
+        self.minimap_enabled = False
         # Category system
         self.categories = [
             {"name": "Items", "bag_icon": "bag_1", "bg": "bg_1"},
@@ -52,6 +53,9 @@ class Bag:
         
         # Load initial sprites
         self.update_sprites()
+        
+        self.using_rare_candy = False  # Track if we're selecting a pokemon for rare candy
+        self.pending_item_use = None
         
     def update_sprites(self):
         """Update the background and bag icon based on current category"""
@@ -146,6 +150,8 @@ class Bag:
                 category = "Medicine"
             elif item_name == "Pokeball":
                 category = "Poke Balls"
+            elif item_name == 'Minimap':
+                category = 'Key Items'
             else:
                 category = "Items"  # Default category
         
@@ -173,6 +179,30 @@ class Bag:
             elif item["name"] == "Pokeball":
                 item["category"] = "Poke Balls"
     
+    def use_rare_candy(self):
+        """Start the rare candy usage flow"""
+        if self.game_manager and hasattr(self.game_manager, 'pokemon'):
+            # Close bag and open pokemon interface
+            self.overlay = False
+            self.game_manager.pokemon.open_for_item_use("Rare Candy", self.on_rare_candy_used)
+    
+    def on_rare_candy_used(self, success: bool):
+        """Callback when rare candy is used on a pokemon"""
+        if success:
+            # Remove one rare candy from inventory
+            current_items = self.get_current_category_items()
+            for item in self._items_data:
+                if item["name"] == "Rare Candy":
+                    item["count"] -= 1
+                    if item["count"] <= 0:
+                        self._items_data.remove(item)
+                    break
+        
+        # Reopen bag if it was open from menu
+        if self.opened_from_menu:
+            self.open()
+            self.opened_from_menu = True
+            
     def handle_input(self):
         """Handle keyboard input for category switching and item selection"""
         current_items = self.get_current_category_items()
@@ -208,6 +238,17 @@ class Bag:
             else:
             # An item was selected
                 selected_item = current_items[self.selected_item_index]
+                if selected_item["name"] == "Rare Candy":
+                    self.use_rare_candy()
+                    return
+                
+                if selected_item["name"] in ["Minimap", "Watch"]:
+                    if self.game_manager and hasattr(self.game_manager, 'minimap'):
+                        # Toggle minimap visibility
+                        self.game_manager.minimap_enabled = not self.game_manager.minimap_enabled
+                        # Close bag after toggling
+                        self.close(reopen_menu=self.opened_from_menu)
+                    return
                 
                 # Town Map can only be used from menu
                 if selected_item["name"] == "Town Map":
@@ -228,6 +269,7 @@ class Bag:
         if input_manager.key_pressed(pg.K_ESCAPE):
             self.close()
         
+    
     def update(self, dt: float):
         if self.overlay:
             self.handle_input()
@@ -308,6 +350,8 @@ class Bag:
             
             screen.blit(name_text, (self.item_start_x + 90, item_y))
             screen.blit(count_text, (self.item_start_x + 520, item_y))
+            
+            
             
             item_y += self.item_spacing
             item_index += 1

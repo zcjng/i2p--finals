@@ -45,6 +45,23 @@ class Pokemon:
         self.opened_from_menu = False
         self.game_manager = game_manager
         
+        self.item_use_mode = False  # Track if we're using an item
+        self.item_being_used = None  # Which item is being used
+        self.item_callback = None  # Callback when item is used
+        
+        # Evolution animation
+        self.evolution_overlay = None
+        self.evolution_timer = 0
+        self.evolving_pokemon = None
+        
+    def open_for_item_use(self, item_name: str, callback):
+        """Open pokemon interface for item usage"""
+        self.item_use_mode = True
+        self.item_being_used = item_name
+        self.item_callback = callback
+        self.open()
+        
+        
     def update_sprites(self):
         """Update the background and UI sprites"""
         self.background = Sprite(f"Bag/bg_1.png", (GameSettings.SCREEN_WIDTH - 250, GameSettings.SCREEN_HEIGHT))
@@ -150,12 +167,77 @@ class Pokemon:
                 self.close()
             else:
                 # Selected a pokemon - you can add interaction logic here
-                pass
+                if self.item_use_mode and self.item_being_used == "Rare Candy":
+                    self.use_rare_candy_on_pokemon(self.selected_pokemon_index)
         
         # Close with ESC
         if input_manager.key_pressed(pg.K_ESCAPE):
             self.close()
             
+    def use_rare_candy_on_pokemon(self, index: int):
+        """Use rare candy on a pokemon to level it up"""
+        from src.data.pokemon_evolution_data import EVOLUTION_DATA, STAT_GROWTH
+        
+        if index >= len(self._monsters_data):
+            return
+        
+        pokemon = self._monsters_data[index]
+        old_level = pokemon["level"]
+        
+        # Level up
+        pokemon["level"] += 1
+        
+        # Increase stats based on pokemon
+        pokemon_name = pokemon["name"]
+        if pokemon_name in STAT_GROWTH:
+            growth = STAT_GROWTH[pokemon_name]
+            pokemon["max_hp"] += growth["hp"]
+            pokemon["hp"] += growth["hp"]  # Also heal by the amount gained
+            
+            # Add attack/defense if you have those stats
+            if "attack" not in pokemon:
+                pokemon["attack"] = 50  # Default starting attack
+            if "defense" not in pokemon:
+                pokemon["defense"] = 50  # Default starting defense
+            
+            pokemon["attack"] += growth["attack"]
+            pokemon["defense"] += growth["defense"]
+        
+        # Check for evolution
+        if pokemon_name in EVOLUTION_DATA:
+            evo_data = EVOLUTION_DATA[pokemon_name]
+            if evo_data["evolves_at"] and pokemon["level"] >= evo_data["evolves_at"]:
+                self.evolve_pokemon(index, evo_data)
+        
+        # Callback success
+        if self.item_callback:
+            self.item_callback(True)
+        
+        # Close pokemon interface
+        self.close()
+    
+    def evolve_pokemon(self, index: int, evolution_data: dict):
+        """Evolve a pokemon"""
+        pokemon = self._monsters_data[index]
+        old_name = pokemon["name"]
+        new_name = evolution_data["evolves_to"]
+        
+        # Update pokemon data
+        pokemon["name"] = new_name
+        if "new_sprites" in evolution_data:
+            sprites = evolution_data["new_sprites"]
+            pokemon["sprite_path"] = sprites.get("sprite_path", pokemon["sprite_path"])
+            pokemon["battle_sprite"] = sprites.get("battle_sprite", pokemon["battle_sprite"])
+            if "idle" in sprites:
+                pokemon["idle"] = sprites["idle"]
+        
+        # Show evolution message (you can make this fancier)
+        from src.utils import Logger
+        Logger.info(f"{old_name} evolved into {new_name}!")
+        
+        # Update the sprite
+        self.update_selected_pokemon_sprite()
+        
     def get_quit_position(self):
         return (
         self.pokemon_start_x - 120,
@@ -178,6 +260,20 @@ class Pokemon:
         pokemon_index = 0
         pokemons = 0
         
+        if self.item_use_mode and self.item_being_used:
+            indicator_text = self.font_large.render(
+                f"Select Pokemon for {self.item_being_used}", 
+                True, 
+                (255, 200, 0)
+            )
+            indicator_shadow = self.font_large.render(
+                f"Select Pokemon for {self.item_being_used}", 
+                True, 
+                (0, 0, 0)
+            )
+            screen.blit(indicator_shadow, (GameSettings.SCREEN_WIDTH // 2 - 200, 52))
+            screen.blit(indicator_text, (GameSettings.SCREEN_WIDTH // 2 - 202, 50))
+            
         for pokemon in self._monsters_data:
             name = pokemon["name"]
             hp = pokemon["hp"]
@@ -306,6 +402,15 @@ class Pokemon:
     def close(self):
         self.overlay = False
         self.selected_pokemon_index = 0 
+        
+        if self.item_use_mode:
+            self.item_use_mode = False
+            self.item_being_used = None
+            if self.item_callback:
+                self.item_callback(False)  # Cancelled
+            self.item_callback = None
+            return
+        
         if self.opened_from_menu:
             self.opened_from_menu = False
             

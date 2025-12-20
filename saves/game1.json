@@ -15,7 +15,7 @@
         }
       ],
       "player": {
-        "x": 21.0,
+        "x": 23.0,
         "y": 28.0
       },
       "enemy_trainers": [
@@ -96,7 +96,7 @@
   ],
   "current_map": "map3.tmx",
   "player": {
-    "x": 21.0,
+    "x": 23.0,
     "y": 28.0
   },
   "bag": {
@@ -130,6 +130,18 @@
         "count": 3,
         "sprite_path": "ingame_ui/options6.png",
         "category": "Medicine"
+      },
+      {
+        "name": "Minimap",
+        "count": 1,
+        "sprite_path": "ingame_ui/options3.png",
+        "category": "Key Items"
+      },
+      {
+        "name": "Rare Candy",
+        "count": 86,
+        "sprite_path": "ingame_ui/options2.png",
+        "category": "Medicine"
       }
     ],
     "money": 5000
@@ -137,16 +149,18 @@
   "pokemon": {
     "monsters": [
       {
-        "name": "Pikachu",
-        "hp": 85.0,
+        "name": "Leaf",
+        "hp": 90,
         "max_hp": 100,
-        "level": 25,
+        "level": 20,
         "sprite_path": "menu_sprites/menusprite1.png",
         "battle_sprite": "sprites/sprite1.png",
-        "idle": "sprites/sprite1_idle.png"
+        "idle": "sprites/sprite1_idle.png",
+        "attack": 40,
+        "defense": 50
       },
       {
-        "name": "Charizard",
+        "name": "Green",
         "hp": 150,
         "max_hp": 200,
         "level": 36,
@@ -155,7 +169,7 @@
         "idle": "sprites/sprite2_idle.png"
       },
       {
-        "name": "Blastoise",
+        "name": "Jade",
         "hp": 120,
         "max_hp": 180,
         "level": 32,
@@ -259,5 +273,6 @@
         "idle": "sprites/sprite5_idle.png"
       }
     ]
-  }
+  },
+  "minimap_enabled": false
 }

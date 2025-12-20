@@ -9,9 +9,11 @@ from src.core.services import sound_manager
 from src.sprites import Sprite, Animation
 from typing import override
 from src.interface.components import Button
+from typing import override, Dict, Tuple
 from src.core.services import scene_manager, sound_manager, input_manager
 from src.interface.menu import Menu
 from src.interface.minimap import Minimap
+from src.interface.components.chat_overlay import ChatOverlay
 
 class GameScene(Scene):
     game_manager: GameManager
@@ -33,18 +35,43 @@ class GameScene(Scene):
 
         self.menu = Menu(self.game_manager)
         self.game_manager.menu = self.menu
+        
         self.menu.set_save_callback(self.save_game)
         self.menu.set_load_callback(self.load_game)
         
         self.minimap = Minimap(size=150, padding=10)
+        self.game_manager.minimap = self.minimap
+        
+        if hasattr(self.game_manager, 'minimap_enabled'):
+            self.minimap.visible = self.game_manager.minimap_enabled
         
         # Online Manager
         if GameSettings.IS_ONLINE:
             self.online_manager = OnlineManager()
+            self.chat_overlay = ChatOverlay(
+                send_callback=self.send_chat,
+                get_messages=self.get_chat_messages
+            )
         else:
             self.online_manager = None
+            self.chat_overlay = None
+            
         self.sprite_online = Sprite("character/ow1.png", (GameSettings.TILE_SIZE, GameSettings.TILE_SIZE))
         self.online_player_sprites: dict[int, Animation] = {}
+        
+        
+    def send_chat(self, text: str):
+        """Send a chat message"""
+        if self.online_manager:
+            return self.online_manager.send_chat(text)
+        return False
+    
+    def get_chat_messages(self, limit: int = 50):
+        """Get recent chat messages"""
+        if self.online_manager:
+            return self.online_manager.get_recent_chat(limit)
+        return []
+    
     def check_pc_interaction(self):
         """Check if player is near a PC and wants to interact"""
         if not self.game_manager.player:
@@ -75,6 +102,13 @@ class GameScene(Scene):
             
             self.menu.game_manager = loaded_gm
             
+            self.game_manager.minimap = self.minimap  # ADD THIS
+        
+        # Restore minimap state
+            if hasattr(self.game_manager, 'minimap_enabled'):  # ADD THIS
+                self.minimap.visible = self.game_manager.minimap_enabled 
+                
+            
             Logger.info('Game loaded successfully')
         else:
             Logger.error('Failed to load game from ' + load_path)
@@ -94,6 +128,22 @@ class GameScene(Scene):
     @override
     def update(self, dt: float):
         # Check if there is assigned next scene
+        
+        if self.chat_overlay:
+            if input_manager.key_pressed(pg.K_t):
+                if not self.menu.overlay and not self.game_manager.bag.overlay and \
+                   not self.game_manager.pokemon.overlay and not self.game_manager.options.overlay and \
+                   not self.game_manager.pc_storage.is_open and not self.game_manager.townmap.overlay:
+                    if self.chat_overlay.is_open:
+                        self.chat_overlay.close()
+                    else:
+                        self.chat_overlay.open()
+
+        # Update chat overlay first (so it can capture input)
+        if self.chat_overlay and self.chat_overlay.is_open:
+            self.chat_overlay.update(dt)
+            # Don't process other inputs while chat is open
+            return
         
 
         # Update player and other data
@@ -144,15 +194,7 @@ class GameScene(Scene):
                 for npc in self.game_manager.current_npcs:
                     npc.update(dt)
                 
-            
-        
                 
-        
-            
-
-            
-            
-        
         if self.game_manager.player is not None and self.online_manager is not None:
             direction = self.game_manager.player.direction.name.lower()
             _ = self.online_manager.update(
@@ -244,9 +286,11 @@ class GameScene(Scene):
             ]
             for pid in players_to_remove:
                 del self.online_player_sprites[pid]
-
+                
         
         if self.game_manager.player:
+            if hasattr(self.game_manager, 'minimap_enabled'):
+                self.minimap.visible = self.game_manager.minimap_enabled
             self.minimap.draw(
                     screen, 
                     self.game_manager.player.position,
@@ -285,3 +329,8 @@ class GameScene(Scene):
             
         if self.game_manager.pc_storage.is_open:
             self.game_manager.pc_storage.draw(screen, self.game_manager.bag)
+
+        if self.chat_overlay:
+            self.chat_overlay.draw(screen)
+            
+

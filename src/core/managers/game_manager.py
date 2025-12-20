@@ -298,7 +298,8 @@ class GameManager:
             "bag": self.bag.to_dict(),
             "pokemon": self.pokemon.to_dict(),
             "options": {},
-            "pc_storage": self.pc_storage.to_dict()
+            "pc_storage": self.pc_storage.to_dict(),
+            "minimap_enabled": getattr(self, 'minimap_enabled', False)
         }
 
     @classmethod
@@ -369,4 +370,5 @@ class GameManager:
         Logger.info("Loading PC Storage")
         gm.pc_storage = PCStorage.from_dict(data.get("pc_storage", {})) if data.get("pc_storage") else PCStorage()
 
+        gm.minimap_enabled = data.get("minimap_enabled", False)
         return gm

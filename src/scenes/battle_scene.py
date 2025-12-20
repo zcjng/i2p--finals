@@ -435,8 +435,8 @@ class BattleScene(Scene):
         px = GameSettings.SCREEN_WIDTH // 2
         py = GameSettings.SCREEN_HEIGHT // 2
         
-        y_offset = 170 + (self.attack_menu_index * 70)
-        screen.blit(self.selector.image, (px + 90, py + y_offset))
+        y_offset = 205 + (self.attack_menu_index * 70)
+        screen.blit(self.selector.image, (px + 100, py + y_offset))
     
     def update(self, dt: float):
         if self.battle_over and self.battle_end_timer > 0:
@@ -553,11 +553,11 @@ class BattleScene(Scene):
                 # Draw attack selection menu
                 screen.blit(self.menu.image, (px + 60, py + 150))
                 button_font = pg.font.Font("assets/fonts/Pokemon.ttf", 60)
-                
+                buttons_font = pg.font.Font("assets/fonts/Pokemon.ttf", 70)
                 for i, attack in enumerate(self.player.attacks):
                     y_pos = py + 185 + (i * 70)
-                    attack_text = button_font.render(f"{attack.name} ({attack.element})", True, (50, 50, 50))
-                    screen.blit(attack_text, (px + 120, y_pos))
+                    attack_text = buttons_font.render(f"{attack.name} ({attack.element})", True, (50, 50, 50))
+                    screen.blit(attack_text, (px + 140, y_pos))
                 
                 # Back option
 
