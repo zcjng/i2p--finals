@@ -179,6 +179,9 @@ class GameScene(Scene):
                 
                 just_stopped = moving and not self.game_manager.player.moving
                 
+                self.game_manager.townmap.update_path_progress(self.game_manager.player.position, dt)
+                
+                
                 self.game_manager.bush_interaction(just_stopped)
                     
                 for enemy in self.game_manager.current_enemy_trainers:
@@ -304,7 +307,7 @@ class GameScene(Scene):
         # Draw town map overlay
         if self.game_manager.townmap.overlay:
             screen.blit(self.game_manager.townmap.dim_overlay, (0, 0))
-            self.game_manager.townmap.draw(screen)
+            self.game_manager.townmap.draw_navigation_arrows(screen, camera)
     
         # Then draw overlays (which cover the buttons with dim effect)
         if self.game_manager.pokemon.overlay:  # ← ADD THIS FIRST
