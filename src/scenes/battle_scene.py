@@ -206,6 +206,9 @@ class BattleScene(Scene):
         
     def open_bag(self):
         """Open bag for item usage"""
+        if not self.waiting_input or not self.player_turn or self.battle_over:
+            return
+        
         self.game_manager.bag.in_battle = True
         self.game_manager.bag.open()
         
@@ -233,6 +236,8 @@ class BattleScene(Scene):
                 if item["count"] <= 0:
                     self.game_manager.bag._items_data.remove(item)
                 break
+        
+        self.waiting_input = False  #
         
         # After using item, enemy attacks
         self.player_turn = False
@@ -325,6 +330,8 @@ class BattleScene(Scene):
     def catch_pokemon(self, enemy_pokemon):
         caught_pokemon = enemy_pokemon.copy()
         caught_pokemon['hp'] = max(0, self.enemy.hp)
+        
+        self.waiting_input = False
         
         if self.game_manager.pokemon.max_party_size <= len(self.game_manager.pokemon._monsters_data):
             self.game_manager.pc_storage.deposit_pokemon(caught_pokemon)

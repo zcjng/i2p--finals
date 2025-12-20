@@ -243,6 +243,8 @@ class Bag:
                     return
                 
                 if selected_item["name"] in ["Minimap", "Watch"]:
+                    if not self.opened_from_menu:  # ADD THIS CHECK
+                        return
                     if self.game_manager and hasattr(self.game_manager, 'minimap'):
                         # Toggle minimap visibility
                         self.game_manager.minimap_enabled = not self.game_manager.minimap_enabled
@@ -259,10 +261,11 @@ class Bag:
                     # If not from menu (in battle), do nothing
                 
                 # Other items can only be used in battle
-                elif not self.opened_from_menu:
-                    self.item_used = True  # Signal BattleScene
-                    self.close(False)
+                    return
 
+                if not self.opened_from_menu:  # Changed from elif
+                    self.item_used = True
+                    self.close(False)
         
         
         # Close bag with ESC

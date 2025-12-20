@@ -209,12 +209,12 @@ class Pokemon:
             if evo_data["evolves_at"] and pokemon["level"] >= evo_data["evolves_at"]:
                 self.evolve_pokemon(index, evo_data)
         
-        # Callback success
+        # Callback success - DON'T close the interface, keep it open!
         if self.item_callback:
             self.item_callback(True)
         
-        # Close pokemon interface
-        self.close()
+        # Don't close - stay in Pokemon interface so user can use more candies
+        self.close()  # Commented out to keep interface open
     
     def evolve_pokemon(self, index: int, evolution_data: dict):
         """Evolve a pokemon"""

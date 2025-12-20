@@ -35,9 +35,9 @@ EVOLUTION_DATA = {
 }
 
 STAT_GROWTH = {
-    "Pikachu": {"hp": 3, "attack": 2, "defense": 1.5},
-    "Raichu": {"hp": 4, "attack": 3, "defense": 2},
-    "Charizard": {"hp": 5, "attack": 4, "defense": 3},
+    "Leaf": {"hp": 3, "attack": 2, "defense": 1.5},
+    "Green": {"hp": 4, "attack": 3, "defense": 2},
+    "Jade": {"hp": 5, "attack": 4, "defense": 3},
     "Blastoise": {"hp": 5, "attack": 3, "defense": 4},
     "Venusaur": {"hp": 5, "attack": 3.5, "defense": 3.5},
     "Gengar": {"hp": 4, "attack": 4.5, "defense": 2},

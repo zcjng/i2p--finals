@@ -215,7 +215,8 @@ class GameManager:
                 "level": 30, 
                 "sprite_path": "menu_sprites/menusprite4.png", 
                 "battle_sprite": "sprites/sprite4.png",
-                "idle": "sprites/sprite4_idle.png"  # ADD THIS
+                "idle": "sprites/sprite4_idle.png",  # ADD THIS
+                "element": "Water"
             },
             { 
                 "name": "Gengar",    
@@ -224,7 +225,8 @@ class GameManager:
                 "level": 28, 
                 "sprite_path": "menu_sprites/menusprite5.png", 
                 "battle_sprite": "sprites/sprite5.png",
-                "idle": "sprites/sprite5_idle.png"  # ADD THIS
+                "idle": "sprites/sprite5_idle.png",  # ADD THIS
+                "element": "Rock"
             },
             { 
                 "name": "Dragonite", 
@@ -233,7 +235,8 @@ class GameManager:
                 "level": 40, 
                 "sprite_path": "menu_sprites/menusprite6.png", 
                 "battle_sprite": "sprites/sprite6.png",
-                "idle": "sprites/sprite6_idle.png"  # ADD THIS
+                "idle": "sprites/sprite6_idle.png",  # ADD THIS
+                "element": "Flying"
             }
         ]
         }
@@ -247,7 +250,8 @@ class GameManager:
             "level": 30, 
             "sprite_path": "menu_sprites/menusprite4.png", 
             "battle_sprite": "sprites/sprite4.png",
-            "idle": "sprites/sprite4_idle.png"  # ADD THIS TO DEFAULT TOO
+            "idle": "sprites/sprite4_idle.png",  # ADD THIS TO DEFAULT TOO
+            "element": "Grass"
         }
         
         return random.choice(pokemon_list)

@@ -157,7 +157,8 @@
         "battle_sprite": "sprites/sprite1.png",
         "idle": "sprites/sprite1_idle.png",
         "attack": 40,
-        "defense": 50
+        "defense": 50,
+        "element": "Fire"
       },
       {
         "name": "Green",
@@ -166,34 +167,18 @@
         "level": 36,
         "sprite_path": "menu_sprites/menusprite2.png",
         "battle_sprite": "sprites/sprite2.png",
-        "idle": "sprites/sprite2_idle.png"
+        "idle": "sprites/sprite2_idle.png",
+        "element": "Fire"
       },
       {
         "name": "Jade",
         "hp": 120,
         "max_hp": 180,
-        "level": 32,
+        "level": 50,
         "sprite_path": "menu_sprites/menusprite3.png",
         "battle_sprite": "sprites/sprite3.png",
-        "idle": "sprites/sprite3_idle.png"
-      },
-      {
-        "name": "Venusaur",
-        "hp": 90,
-        "max_hp": 160,
-        "level": 30,
-        "sprite_path": "menu_sprites/menusprite4.png",
-        "battle_sprite": "sprites/sprite4.png",
-        "idle": "sprites/sprite4_idle.png"
-      },
-      {
-        "name": "Gengar",
-        "hp": 110,
-        "max_hp": 140,
-        "level": 28,
-        "sprite_path": "menu_sprites/menusprite5.png",
-        "battle_sprite": "sprites/sprite5.png",
-        "idle": "sprites/sprite5_idle.png"
+        "idle": "sprites/sprite3_idle.png",
+        "element": "Fire"
       }
     ]
   },
@@ -207,7 +192,8 @@
         "level": 40,
         "sprite_path": "menu_sprites/menusprite6.png",
         "battle_sprite": "sprites/sprite6.png",
-        "idle": "sprites/sprite6_idle.png"
+        "idle": "sprites/sprite6_idle.png",
+        "element": "Water"
       },
       {
         "name": "Dragonite",
@@ -216,7 +202,8 @@
         "level": 40,
         "sprite_path": "menu_sprites/menusprite6.png",
         "battle_sprite": "sprites/sprite6.png",
-        "idle": "sprites/sprite6_idle.png"
+        "idle": "sprites/sprite6_idle.png",
+        "element": "Water"
       },
       {
         "name": "Venusaur",
@@ -225,7 +212,8 @@
         "level": 30,
         "sprite_path": "menu_sprites/menusprite4.png",
         "battle_sprite": "sprites/sprite4.png",
-        "idle": "sprites/sprite4_idle.png"
+        "idle": "sprites/sprite4_idle.png",
+        "element": "Grass"
       },
       {
         "name": "Gengar",
@@ -234,7 +222,8 @@
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
         "battle_sprite": "sprites/sprite5.png",
-        "idle": "sprites/sprite5_idle.png"
+        "idle": "sprites/sprite5_idle.png",
+        "element": "Rock"
       },
       {
         "name": "Gengar",
@@ -243,7 +232,8 @@
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
         "battle_sprite": "sprites/sprite5.png",
-        "idle": "sprites/sprite5_idle.png"
+        "idle": "sprites/sprite5_idle.png",
+        "element": "Flying"
       },
       {
         "name": "Gengar",
@@ -252,25 +242,9 @@
         "level": 28,
         "sprite_path": "menu_sprites/menusprite5.png",
         "battle_sprite": "sprites/sprite5.png",
-        "idle": "sprites/sprite5_idle.png"
-      },
-      {
-        "name": "Gengar",
-        "hp": 110,
-        "max_hp": 140,
-        "level": 28,
-        "sprite_path": "menu_sprites/menusprite5.png",
-        "battle_sprite": "sprites/sprite5.png",
-        "idle": "sprites/sprite5_idle.png"
-      },
-      {
-        "name": "Gengar",
-        "hp": 110,
-        "max_hp": 140,
-        "level": 28,
-        "sprite_path": "menu_sprites/menusprite5.png",
-        "battle_sprite": "sprites/sprite5.png",
-        "idle": "sprites/sprite5_idle.png"
+        "idle": "sprites/sprite5_idle.png",
+        "element": "Lightning"
+
       }
     ]
   },
