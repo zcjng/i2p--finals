@@ -179,7 +179,7 @@ class GameScene(Scene):
                 
                 just_stopped = moving and not self.game_manager.player.moving
                 
-                self.game_manager.townmap.update_path_progress(self.game_manager.player.position, dt)
+                self.game_manager.townmap.update_path_progress(self.game_manager.player.position)
                 
                 
                 self.game_manager.bush_interaction(just_stopped)
