@@ -19,7 +19,7 @@ from typing import Any
 class OnlineManager:
     list_players: list[dict]
     player_id: int
-    # WebSocket state
+
     _ws: Optional[Any]
     _ws_loop: Optional[asyncio.AbstractEventLoop]
     _ws_thread: Optional[threading.Thread]
@@ -36,7 +36,7 @@ class OnlineManager:
             raise ImportError("websockets library required")
 
         self.base: str = GameSettings.ONLINE_SERVER_URL
-        # Convert HTTP URL to WebSocket URL
+
         if self.base.startswith("http://"):
             self.ws_url = self.base.replace("http://", "ws://")
         elif self.base.startswith("https://"):
@@ -98,7 +98,7 @@ class OnlineManager:
     def stop(self) -> None:
         self._stop_event.set()
         if self._ws_loop and self._ws_loop.is_running():
-            # Schedule stop in the event loop
+
             asyncio.run_coroutine_threadsafe(self._close_ws(), self._ws_loop)
         if self._ws_thread and self._ws_thread.is_alive():
             self._ws_thread.join(timeout=3)
@@ -130,7 +130,7 @@ class OnlineManager:
         max_reconnect_delay = 30.0
         while not self._stop_event.is_set():
             try:
-                # Connect to WebSocket server
+
                 async with websockets.connect(
                     self.ws_url,
                     ping_interval=20,
@@ -138,12 +138,12 @@ class OnlineManager:
                 ) as websocket:
                     self._ws = websocket
                     Logger.info("WebSocket connected")
-                    reconnect_delay = 1.0  # Reset delay on successful connection
+                    reconnect_delay = 1.0
 
-                    # Start sender task
+
                     sender_task = asyncio.create_task(self._ws_sender(websocket))
 
-                    # Handle incoming messages
+
                     try:
                         async for message in websocket:
                             if self._stop_event.is_set():
@@ -212,15 +212,15 @@ class OnlineManager:
 
     async def _ws_sender(self, websocket: Any) -> None:
         """Send updates to server via WebSocket"""
-        update_interval = 0.0167  # 60 updates per second
+        update_interval = 0.0167
         last_update = time.monotonic()
 
         while not self._stop_event.is_set():
             try:
-                # Send position updates
+
                 now = time.monotonic()
                 if now - last_update >= update_interval:
-                    # Collapse queue to latest entry to avoid sending stale movement
+
                     latest_update = None
                     try:
                         while True:
@@ -239,7 +239,7 @@ class OnlineManager:
                         await websocket.send(json.dumps(message))
                         last_update = now
 
-                # Send chat messages
+
                 try:
                     chat_text = self._chat_out_queue.get_nowait()
                     if self.player_id >= 0:
@@ -251,15 +251,15 @@ class OnlineManager:
                 except queue.Empty:
                     pass
 
-                await asyncio.sleep(0.01)  # Small sleep to prevent busy waiting
+                await asyncio.sleep(0.01)
 
             except Exception as e:
                 Logger.warning(f"WebSocket send error: {e}")
                 await asyncio.sleep(0.1)
 
-    # -----------------------------
-    # Chat API
-    # -----------------------------
+
+
+
     def send_chat(self, text: str) -> bool:
         if self.player_id == -1:
             return False

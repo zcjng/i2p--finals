@@ -10,9 +10,9 @@ PORT = 8989
 PLAYER_HANDLER = PlayerHandler()
 PLAYER_HANDLER.start()
 
-# ------------------------------
-# Simple in-memory chat storage
-# ------------------------------
+
+
+
 class ChatStore:
     def __init__(self) -> None:
         self._lock = threading.Lock()
@@ -20,7 +20,7 @@ class ChatStore:
         self._messages: list[dict] = []
 
     def add(self, sender_id: int, text: str) -> dict:
-        # Sanitize
+
         t = (text or "").strip()
         if len(t) > 200:
             t = t[:200]
@@ -36,7 +36,7 @@ class ChatStore:
             }
             self._messages.append(msg)
             self._next_id += 1
-            # Keep only the last N to avoid unbounded growth
+
             if len(self._messages) > 1000:
                 self._messages = self._messages[-800:]
             return msg
@@ -44,28 +44,28 @@ class ChatStore:
     def list_since(self, since_id: int) -> list[dict]:
         with self._lock:
             if since_id <= 0:
-                return list(self._messages[-100:])  # cap response size
-            # Find first index with id > since_id
-            # Messages are appended in increasing id order
+                return list(self._messages[-100:])
+
+
             out: list[dict] = []
             for m in self._messages:
                 if int(m.get("id", 0)) > since_id:
                     out.append(m)
-            # Cap size
+
             if len(out) > 200:
                 out = out[-200:]
             return out
 
 CHAT = ChatStore()
 
-# Track connected clients
+
 CONNECTED_CLIENTS: Set[Any] = set()
 CLIENTS_LOCK = asyncio.Lock()
 
 async def broadcast_player_update():
     """Broadcast player list to all connected clients periodically"""
     while True:
-        await asyncio.sleep(0.0167)  # 60 updates per second
+        await asyncio.sleep(0.0167)
         players = PLAYER_HANDLER.list_players()
         message = {
             "type": "players_update",
@@ -74,7 +74,7 @@ async def broadcast_player_update():
         }
         msg_json = json.dumps(message)
 
-        # Broadcast to all connected clients
+
         disconnected = set()
         async with CLIENTS_LOCK:
             for client in CONNECTED_CLIENTS:
@@ -82,7 +82,7 @@ async def broadcast_player_update():
                     await client.send(msg_json)
                 except Exception:
                     disconnected.add(client)
-            # Remove disconnected clients
+
             CONNECTED_CLIENTS.difference_update(disconnected)
 
 async def handle_client(websocket: Any):
@@ -93,14 +93,14 @@ async def handle_client(websocket: Any):
         CONNECTED_CLIENTS.add(websocket)
     
     try:
-        # Register player on connection - server assigns ID
+
         player_id = PLAYER_HANDLER.register()
         await websocket.send(json.dumps({
             "type": "registered",
             "id": player_id
         }))
         
-        # Send initial player list
+
         players = PLAYER_HANDLER.list_players()
         await websocket.send(json.dumps({
             "type": "players_update",
@@ -108,14 +108,14 @@ async def handle_client(websocket: Any):
             "timestamp": time.time()
         }))
         
-        # Send recent chat messages
+
         recent_chat = CHAT.list_since(0)
         await websocket.send(json.dumps({
             "type": "chat_update",
             "messages": recent_chat
         }))
         
-        # Handle incoming messages
+
         async for message in websocket:
             try:
                 data = json.loads(message)
@@ -123,22 +123,22 @@ async def handle_client(websocket: Any):
                 
                 
                 if msg_type == "player_update":
-                    # Update player position with direction
+
                     x = float(data.get("x", 0))
                     y = float(data.get("y", 0))
                     map_name = str(data.get("map", ""))
                     direction = str(data.get("direction", "down"))
                     
-                    # Use the server-assigned player_id, not client-provided
+
                     PLAYER_HANDLER.update(player_id, x, y, map_name, direction)
                     
                 elif msg_type == "chat_send":
-                    # Send chat message - use server-assigned ID
+
                     text = str(data.get("text", ""))
                     if text:
                         try:
-                            msg = CHAT.add(player_id, text)  # Use server-assigned ID
-                            # Broadcast to all clients
+                            msg = CHAT.add(player_id, text)
+
                             chat_msg = {
                                 "type": "chat_update",
                                 "messages": [msg]
@@ -172,7 +172,7 @@ async def handle_client(websocket: Any):
     except Exception as e:
         print(f"[Server] Client handler error: {e}")
     finally:
-        # Unregister player on disconnect
+
         if player_id >= 0:
             PLAYER_HANDLER.unregister(player_id)
         async with CLIENTS_LOCK:
@@ -180,11 +180,11 @@ async def handle_client(websocket: Any):
 
 async def main():
     print(f"[Server] Running WebSocket server on ws://0.0.0.0:{PORT}")
-    # Start broadcast task
+
     asyncio.create_task(broadcast_player_update())
-    # Start server
+
     async with serve(handle_client, "0.0.0.0", PORT):
-        await asyncio.Future()  # run forever
+        await asyncio.Future()
 
 if __name__ == "__main__":
     asyncio.run(main())

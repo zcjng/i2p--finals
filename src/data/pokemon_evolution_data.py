@@ -18,19 +18,19 @@ EVOLUTION_DATA = {
         }
     },
     "Blastoise": {
-        "evolves_at": None  # Already fully evolved
+        "evolves_at": None
     },
     "Venusaur": {
-        "evolves_at": None  # Already fully evolved
+        "evolves_at": None
     },
     "Gengar": {
-        "evolves_at": None  # Already fully evolved
+        "evolves_at": None
     },
     "Dragonite": {
-        "evolves_at": None  # Already fully evolved
+        "evolves_at": None
     },
     "Raichu": {
-        "evolves_at": None  # Already fully evolved
+        "evolves_at": None
     }
 }
 

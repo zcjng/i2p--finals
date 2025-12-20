@@ -44,32 +44,58 @@ class PositionCamera:
 class Teleport:
     pos: Position
     destination: str
+    spawn_pos: Position | None = None
     
     @overload
-    def __init__(self, x: int, y: int, destination: str): ...
+    def __init__(self, x: int, y: int, destination: str, spawn_pos: Position = None): ...
     @overload
-    def __init__(self, pos: Position, destination: str): ...
+    def __init__(self, pos: Position, destination: str, spawn_pos: Position = None): ...
 
     def __init__(self, *args, **kwargs):
         if isinstance(args[0], Position):
             self.pos = args[0]
             self.destination = args[1]
+            self.spawn_pos = args[2] if len(args) > 2 else kwargs.get('spawn_pos', None)
         else:
             x, y, dest = args
             self.pos = Position(x, y)
             self.destination = dest
+            self.spawn_pos = args[3] if len(args) > 3 else kwargs.get('spawn_pos', None)
     
     def to_dict(self):
-        return {
+        result = {
             "x": self.pos.x // GameSettings.TILE_SIZE,
             "y": self.pos.y // GameSettings.TILE_SIZE,
             "destination": self.destination
         }
+        if self.spawn_pos:
+            result["spawn_x"] = self.spawn_pos.x // GameSettings.TILE_SIZE
+            result["spawn_y"] = self.spawn_pos.y // GameSettings.TILE_SIZE
+        return result
     
     @classmethod
     def from_dict(cls, data: dict):
-        return cls(data["x"] * GameSettings.TILE_SIZE, data["y"] * GameSettings.TILE_SIZE, data["destination"])
-    
+
+        print(f"DEBUG: Loading teleport from data: {data}")  # ADD THIS
+
+        pos = Position(
+            data["x"] * GameSettings.TILE_SIZE,
+            data["y"] * GameSettings.TILE_SIZE
+        )
+        
+        spawn_pos = None
+        if "spawn_x" in data and "spawn_y" in data:
+            spawn_pos = Position(
+                data["spawn_x"] * GameSettings.TILE_SIZE,
+                data["spawn_y"] * GameSettings.TILE_SIZE
+            )
+            print(f"DEBUG: Created spawn_pos: ({spawn_pos.x}, {spawn_pos.y})")  # ADD THIS
+        else:
+            print(f"DEBUG: No spawn_x/spawn_y in data!")  # ADD THIS
+        
+        teleporter = cls(pos, data["destination"], spawn_pos)
+        print(f"DEBUG: Teleporter spawn_pos after creation: {teleporter.spawn_pos}")  # ADD THIS
+        return teleporter
 class Monster(TypedDict):
     name: str
     hp: int

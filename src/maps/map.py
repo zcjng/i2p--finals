@@ -4,13 +4,13 @@ import pytmx
 from src.utils import load_tmx, Position, GameSettings, PositionCamera, Teleport
 from src.utils.definition import PC
 class Map:
-    # Map Properties
+
     path_name: str
     tmxdata: pytmx.TiledMap
-    # Position Argument
+
     spawn: Position
     teleporters: list[Teleport]
-    # Rendering Properties
+
     _surface: pg.Surface
     _collision_map: list[pg.Rect]
 
@@ -25,10 +25,10 @@ class Map:
         pixel_w = self.width * GameSettings.TILE_SIZE
         pixel_h = self.height * GameSettings.TILE_SIZE
 
-        # Prebake the map
+
         self._surface = pg.Surface((pixel_w, pixel_h), pg.SRCALPHA)
         self._render_all_layers(self._surface)
-        # Prebake the collision map
+
         self._collision_map = self._create_collision_map()
 
         self.bushes = self.bush_map()
@@ -41,7 +41,7 @@ class Map:
     def draw(self, screen: pg.Surface, camera: PositionCamera):
         screen.blit(self._surface, camera.transform_position(Position(0, 0)))
         
-        # Draw the hitboxes collision map
+
         
         
         if GameSettings.DRAW_HITBOXES:
@@ -99,7 +99,7 @@ class Map:
     def pc_map(self):
         """Load PC tile positions from the map"""
         pc_tiles = set()
-        PC_TILE_ID = 200  # Change this to match your tile ID
+        PC_TILE_ID = 200
         
         for layer in self.tmxdata.visible_layers:
             if isinstance(layer, pytmx.TiledTileLayer) and ("PC" in layer.name):
@@ -138,8 +138,8 @@ class Map:
         for layer in self.tmxdata.visible_layers:
             if isinstance(layer, pytmx.TiledTileLayer):
                 self._render_tile_layer(target, layer)
-            # elif isinstance(layer, pytmx.TiledImageLayer) and layer.image:
-            #     target.blit(layer.image, (layer.x or 0, layer.y or 0))
+
+
  
     def _render_tile_layer(self, target: pg.Surface, layer: pytmx.TiledTileLayer):
         for x, y, gid in layer:
@@ -177,7 +177,11 @@ class Map:
     @classmethod
     def from_dict(cls, data: dict) -> "Map":
         tp = [Teleport.from_dict(t) for t in data["teleport"]]
-        pos = Position(data["player"]["x"] * GameSettings.TILE_SIZE, data["player"]["y"] * GameSettings.TILE_SIZE)
+        pos = Position(
+        data["player"]["x"] * GameSettings.TILE_SIZE, 
+        data["player"]["y"] * GameSettings.TILE_SIZE
+    )
+    
         return cls(data["path"], tp, pos)
 
     def to_dict(self):

@@ -68,7 +68,7 @@ class Slider(UIComponent):
     
     def draw(self, screen: pg.Surface):
         screen.blit(self.track_sprite.image, self.hitbox)
-        # Draw handle
+
         handle_x = self.normalize(self.value)
         handle_pos = Position(handle_x - self.handle_radius, self.hitbox.centery - self.handle_radius)
         self.handle_sprite.update_pos(handle_pos)

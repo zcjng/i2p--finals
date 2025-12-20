@@ -13,7 +13,7 @@ class Entity:
     game_manager: GameManager
     
     def __init__(self, x: float, y: float, game_manager: GameManager):
-        # Sprite is only for debug, need to change into animations
+
         self.animation = Animation(
             "character/ow1.png", ["down", "left", "right", "up"], 4,
             (GameSettings.TILE_SIZE, GameSettings.TILE_SIZE)

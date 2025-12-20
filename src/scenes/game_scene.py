@@ -23,7 +23,7 @@ class GameScene(Scene):
     
     def __init__(self, gm: GameManager):
         super().__init__()
-        # Game Manager
+
         if gm is not None:
             self.game_manager = gm
         else:
@@ -45,7 +45,7 @@ class GameScene(Scene):
         if hasattr(self.game_manager, 'minimap_enabled'):
             self.minimap.visible = self.game_manager.minimap_enabled
         
-        # Online Manager
+
         if GameSettings.IS_ONLINE:
             self.online_manager = OnlineManager()
             self.chat_overlay = ChatOverlay(
@@ -72,16 +72,18 @@ class GameScene(Scene):
             return self.online_manager.get_recent_chat(limit)
         return []
     
+
+        
     def check_pc_interaction(self):
         """Check if player is near a PC and wants to interact"""
         if not self.game_manager.player:
             return
         
-        if input_manager.key_pressed(pg.K_e):  # Press E to interact with PC
+        if input_manager.key_pressed(pg.K_e):
             player_pos = self.game_manager.player.position
             Logger.info(f"Player pressed E at position ({player_pos.x}, {player_pos.y})")
             
-            # Check if player is on a PC tile
+
             if self.game_manager.current_map.is_near_pc(player_pos):
                 self.game_manager.pc_storage.open()
                 Logger.info("Opened PC Storage")
@@ -102,10 +104,10 @@ class GameScene(Scene):
             
             self.menu.game_manager = loaded_gm
             
-            self.game_manager.minimap = self.minimap  # ADD THIS
+            self.game_manager.minimap = self.minimap
         
-        # Restore minimap state
-            if hasattr(self.game_manager, 'minimap_enabled'):  # ADD THIS
+
+            if hasattr(self.game_manager, 'minimap_enabled'):
                 self.minimap.visible = self.game_manager.minimap_enabled 
                 
             
@@ -127,7 +129,7 @@ class GameScene(Scene):
         
     @override
     def update(self, dt: float):
-        # Check if there is assigned next scene
+
         
         if self.chat_overlay:
             if input_manager.key_pressed(pg.K_t):
@@ -139,14 +141,14 @@ class GameScene(Scene):
                     else:
                         self.chat_overlay.open()
 
-        # Update chat overlay first (so it can capture input)
+
         if self.chat_overlay and self.chat_overlay.is_open:
             self.chat_overlay.update(dt)
-            # Don't process other inputs while chat is open
+
             return
         
 
-        # Update player and other data
+
         if input_manager.key_pressed(pg.K_x) or input_manager.key_pressed(pg.K_ESCAPE):
             if not self.menu.overlay and not self.game_manager.bag.overlay and not self.game_manager.pokemon.overlay and not self.game_manager.options.overlay:
                 self.menu.toggle()
@@ -155,21 +157,22 @@ class GameScene(Scene):
             self.menu.update(dt)
             
         elif self.game_manager.pc_storage.is_open:
-            self.game_manager.pc_storage.update(dt)
+            self.game_manager.pc_storage.update(dt, self.game_manager.pokemon)
         elif self.game_manager.options.overlay:
             self.game_manager.options.update(dt)
         elif self.game_manager.bag.overlay:
             self.game_manager.bag.update(dt)
-        elif self.game_manager.pokemon.overlay:  # ← ADD THIS
+        elif self.game_manager.pokemon.overlay:
             self.game_manager.pokemon.update(dt)
         elif self.game_manager.townmap.overlay:
             self.game_manager.townmap.update(dt)
         else:
-            # Normal gameplay
+
             self.game_manager.map_transition(dt)
             self.check_pc_interaction()
-            # Update others
-            
+
+
+            self.game_manager.townmap.update(dt)
                 
             if self.game_manager.player and not self.game_manager.in_battle:
                 moving = self.game_manager.player.moving
@@ -191,9 +194,8 @@ class GameScene(Scene):
                             self.game_manager.in_battle = True
                             Logger.info('Encounter with an NPC!')
                             
-                            self.game_manager.wild_encounter()
+                            self.game_manager.wild_encounter(enemy)
                             break
-                        
                 for npc in self.game_manager.current_npcs:
                     npc.update(dt)
                 
@@ -234,55 +236,55 @@ class GameScene(Scene):
             for player_data in list_online:
                 player_id = player_data.get("id", -1)
                 
-                # Create animation if it doesn't exist
+
                 if player_id not in self.online_player_sprites:
-                    # Create Animation using the same sprite as your player
-                    # Adjust these parameters to match your player's animation
+
+
                     anim = Animation(
-                        "character/ow1.png",  # Your player sprite sheet
-                        rows=["down", "left", "right", "up"],  # Animation rows
-                        n_keyframes=4,  # Number of frames per row
+                        "character/ow1.png",
+                        rows=["down", "left", "right", "up"],
+                        n_keyframes=4,
                         size=(GameSettings.TILE_SIZE, GameSettings.TILE_SIZE),
-                        loop=1.0  # Animation loop time in seconds
+                        loop=1.0
                     )
                     anim.prev_pos = Position(player_data["x"], player_data["y"])
                     self.online_player_sprites[player_id] = anim
                 
-                    # Get the animation
+
                 anim = self.online_player_sprites[player_id]
 
                 if not hasattr(anim, "prev_pos"):
                     anim.prev_pos = Position(player_data["x"], player_data["y"])
 
-    # Switch to correct direction
+
                 moving = (
                     anim.prev_pos.x != player_data["x"] or
                     anim.prev_pos.y != player_data["y"]
                 )
 
-    # Switch direction
+
                 direction = player_data.get("direction", "down")
                 anim.switch(direction)
 
-                # Update position
+
                 anim.update_pos(Position(player_data["x"], player_data["y"]))
 
-                # Update animation ONLY if moving
-                if moving:
-                    anim.update(0.04)  # advance animation frames
-                else:
-                    anim.frame_index = 0  # stop on first frame of current direction
 
-                # Draw
+                if moving:
+                    anim.update(0.04)
+                else:
+                    anim.frame_index = 0
+
+
                 anim.draw(screen, cam)
 
-    # Save previous position
+
                 anim.prev_pos.x = player_data["x"]
                 anim.prev_pos.y = player_data["y"]
 
             
 
-            # Remove any sprite that no longer exists on the server
+
             players_to_remove = [
                 pid for pid, anim in self.online_player_sprites.items()
                 if pid not in all_online_ids
@@ -304,13 +306,13 @@ class GameScene(Scene):
         if self.game_manager.player:
                 self.game_manager.townmap.draw_navigation_arrows(screen, camera)
 
-        # Draw town map overlay
+
         if self.game_manager.townmap.overlay:
             screen.blit(self.game_manager.townmap.dim_overlay, (0, 0))
-            self.game_manager.townmap.draw_navigation_arrows(screen, camera)
+            self.game_manager.townmap.draw(screen)
     
-        # Then draw overlays (which cover the buttons with dim effect)
-        if self.game_manager.pokemon.overlay:  # ← ADD THIS FIRST
+
+        if self.game_manager.pokemon.overlay:
             screen.blit(self.game_manager.pokemon.dim_overlay, (0, 0))
             self.game_manager.pokemon.draw(screen)
         
@@ -331,7 +333,7 @@ class GameScene(Scene):
             screen.blit(self.game_manager._transition_surface, (0, 0))
             
         if self.game_manager.pc_storage.is_open:
-            self.game_manager.pc_storage.draw(screen, self.game_manager.bag)
+            self.game_manager.pc_storage.draw(screen, self.game_manager.pokemon)
 
         if self.chat_overlay:
             self.chat_overlay.draw(screen)

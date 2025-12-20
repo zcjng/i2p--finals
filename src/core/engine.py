@@ -9,9 +9,9 @@ from src.scenes.setting_scene import SettingScene
 
 class Engine:
 
-    screen: pg.Surface              # Screen Display of the Game
-    clock: pg.time.Clock            # Clock for FPS control
-    running: bool                   # Running state of the game
+    screen: pg.Surface
+    clock: pg.time.Clock
+    running: bool
 
     def __init__(self):
         Logger.info("Initializing Engine")
@@ -55,9 +55,9 @@ class Engine:
                 if event.key == pg.K_ESCAPE:
                     self.running = False
             elif event.type == pg.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left mouse button
+                if event.button == 1:
                     self.drawing = True
-                elif event.button == 2:  # Right mouse button
+                elif event.button == 2:
                     self.draw_positions.clear()
             elif event.type == pg.MOUSEBUTTONUP:
                 self.drawing = False
@@ -71,9 +71,9 @@ class Engine:
         input_manager.reset()
 
     def render(self):
-        self.screen.fill((0, 0, 0))     # Make sure the display is cleared
+        self.screen.fill((0, 0, 0))
         scene_manager.draw(self.screen)
-        # Draw the current scene
+
         '''
         for pos in self.draw_positions:
             pg.draw.circle(self.screen, 'RED', pos, 2)
@@ -83,4 +83,4 @@ class Engine:
             
         pg.draw.circle(self.screen, 'RED', cursor_pos, 5)
         '''
-        pg.display.flip()             # Render the display
+        pg.display.flip()

@@ -21,6 +21,38 @@ class Player(Entity):
     def __init__(self, x: float, y: float, game_manager: GameManager):
         super().__init__(x, y, game_manager)
 
+    def move(self, direction: Direction):
+        """Move the player in the specified direction (used by TownMap auto-walk)"""
+        if self.moving:
+            return
+        
+        dx, dy = 0, 0
+        
+        if direction == Direction.LEFT:
+            dx, dy = -1, 0
+        elif direction == Direction.RIGHT:
+            dx, dy = 1, 0
+        elif direction == Direction.UP:
+            dx, dy = 0, -1
+        elif direction == Direction.DOWN:
+            dx, dy = 0, 1
+        
+        self.direction = direction
+        
+        next_pos = Position(
+            self.position.x + dx * GameSettings.TILE_SIZE,
+            self.position.y + dy * GameSettings.TILE_SIZE
+        )
+        
+        next_rect = self.animation.rect.move(dx * GameSettings.TILE_SIZE, dy * GameSettings.TILE_SIZE)
+        
+
+        if not self.game_manager.current_map.check_collision(next_rect) and not self.collides_with_entity(next_rect):
+            self.moving = True
+            self.move_start = Position(self.position.x, self.position.y)
+            self.move_target = next_pos
+
+
     @override
     def update(self, dt: float):
         if self.game_manager.overlay:
@@ -67,7 +99,8 @@ class Player(Entity):
                     tp = self.game_manager.current_map.check_teleport(next_pos)
                     if tp:
                         Logger.debug("Teleport triggered before collision check")
-                        self.game_manager.switch_map(tp.destination, self.direction)
+
+                        self.game_manager.switch_map(tp.destination, self.direction, tp.spawn_pos)
                         self.teleport_cooldown = 0.2
                         self.teleporting = True
                         self.moving = False
@@ -135,4 +168,3 @@ class Player(Entity):
     @override
     def from_dict(cls, data: dict[str, object], game_manager: GameManager) -> Player:
         return cls(data["x"] * GameSettings.TILE_SIZE, data["y"] * GameSettings.TILE_SIZE, game_manager)
-

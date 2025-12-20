@@ -29,27 +29,27 @@ class Pokemon:
         self.pokemon_start_y = GameSettings.SCREEN_HEIGHT // 2 - 270
         self.pokemon_spacing = 70
         
-        # Selection system
+
         self.selected_pokemon_index = 0
         self.selected_pokemon_sprite = None
         
-        self.bounce_time = 0  # Timer for bounce animation
+        self.bounce_time = 0
         self.random_phase = [random.random() * 10 for _ in self._monsters_data]
-        # Load initial sprites
+
         self.update_sprites()
         
-        self.quit_overlay = pg.Surface((265, 80))  # <-- size you want
+        self.quit_overlay = pg.Surface((265, 80))
         self.quit_overlay.fill((255, 255, 255))
         self.quit_overlay.set_alpha(int(255 * 0.2))
         
         self.opened_from_menu = False
         self.game_manager = game_manager
         
-        self.item_use_mode = False  # Track if we're using an item
-        self.item_being_used = None  # Which item is being used
-        self.item_callback = None  # Callback when item is used
+        self.item_use_mode = False
+        self.item_being_used = None
+        self.item_callback = None
         
-        # Evolution animation
+
         self.evolution_overlay = None
         self.evolution_timer = 0
         self.evolving_pokemon = None
@@ -65,7 +65,7 @@ class Pokemon:
     def update_sprites(self):
         """Update the background and UI sprites"""
         self.background = Sprite(f"Bag/bg_1.png", (GameSettings.SCREEN_WIDTH - 250, GameSettings.SCREEN_HEIGHT))
-        self.pokemon_icon = Sprite(f"Bag/bag_1.PNG", (300, 300))  # You can create a pokeball icon
+        self.pokemon_icon = Sprite(f"Bag/bag_1.PNG", (300, 300))
         self.bag_bar = Sprite(f"Bag/bag_bar.png", (GameSettings.SCREEN_WIDTH, 200))
         self.cursor = Sprite(f"Bag/cursor.png", (570, 110))
         self.category_bar = Sprite(f"Bag/category_bar.png", (350, 90))
@@ -75,7 +75,7 @@ class Pokemon:
     def add_pokemon(self, name: str, hp: int, max_hp: int, level: int, sprite_path: str, battle_sprite: str):
         """Add a pokemon to the party"""
         if len(self._monsters_data) >= self.max_party_size:
-            return False  # Party is full
+            return False
         
         self._monsters_data.append({
             "name": name,
@@ -116,21 +116,21 @@ class Pokemon:
     def update_selected_pokemon_sprite(self):
         """Update the sprite of the currently selected pokemon"""
         if self.selected_pokemon_index < len(self._monsters_data):
-            # A pokemon is selected
+
             selected_pokemon = self._monsters_data[self.selected_pokemon_index]
             sprite_path = selected_pokemon.get('idle')
             if sprite_path:
                 self.selected_pokemon_sprite = Animation(
                                                 sprite_path,
-                                                rows=["idle"],  # If you have multiple animation states, add them here
-                                                n_keyframes=4,   # Number of frames in the animation (adjust based on your sprite)
-                                                size=(200, 200),   # Size of the selector
-                                                loop=1,           # Animation loop time in seconds
+                                                rows=["idle"],
+                                                n_keyframes=4,
+                                                size=(200, 200),
+                                                loop=1,
                                                 vertical=False
                                             )
             
         else:
-            # # Quit selected → keep the last pokemon sprite
+
             if self._monsters_data:
                 last_pokemon = self._monsters_data[-1]
             sprite_path = last_pokemon.get('idle', last_pokemon.get('sprite_path'))
@@ -146,31 +146,31 @@ class Pokemon:
     
     def handle_input(self):
         """Handle keyboard input for pokemon selection"""
-        max_index = len(self._monsters_data)  # CLOSE is at index = len(monsters_data)
+        max_index = len(self._monsters_data)
         
-        # Navigate up
+
         if input_manager.key_pressed(pg.K_UP) or input_manager.key_pressed(pg.K_w):
             if self.selected_pokemon_index > 0:
                 self.selected_pokemon_index -= 1
                 self.update_selected_pokemon_sprite()
         
-        # Navigate down
+
         if input_manager.key_pressed(pg.K_DOWN) or input_manager.key_pressed(pg.K_s):
             if self.selected_pokemon_index < max_index:
                 self.selected_pokemon_index += 1
                 self.update_selected_pokemon_sprite()
         
-        # Select pokemon (Enter or E)
+
         if input_manager.key_pressed(pg.K_RETURN) or input_manager.key_pressed(pg.K_e):
             if self.selected_pokemon_index == max_index:
-                # Selected CLOSE
+
                 self.close()
             else:
-                # Selected a pokemon - you can add interaction logic here
+
                 if self.item_use_mode and self.item_being_used == "Rare Candy":
                     self.use_rare_candy_on_pokemon(self.selected_pokemon_index)
         
-        # Close with ESC
+
         if input_manager.key_pressed(pg.K_ESCAPE):
             self.close()
             
@@ -184,37 +184,37 @@ class Pokemon:
         pokemon = self._monsters_data[index]
         old_level = pokemon["level"]
         
-        # Level up
+
         pokemon["level"] += 1
         
-        # Increase stats based on pokemon
+
         pokemon_name = pokemon["name"]
         if pokemon_name in STAT_GROWTH:
             growth = STAT_GROWTH[pokemon_name]
             pokemon["max_hp"] += growth["hp"]
-            pokemon["hp"] += growth["hp"]  # Also heal by the amount gained
+            pokemon["hp"] += growth["hp"]
             
-            # Add attack/defense if you have those stats
+
             if "attack" not in pokemon:
-                pokemon["attack"] = 50  # Default starting attack
+                pokemon["attack"] = 50
             if "defense" not in pokemon:
-                pokemon["defense"] = 50  # Default starting defense
+                pokemon["defense"] = 50
             
             pokemon["attack"] += growth["attack"]
             pokemon["defense"] += growth["defense"]
         
-        # Check for evolution
+
         if pokemon_name in EVOLUTION_DATA:
             evo_data = EVOLUTION_DATA[pokemon_name]
             if evo_data["evolves_at"] and pokemon["level"] >= evo_data["evolves_at"]:
                 self.evolve_pokemon(index, evo_data)
         
-        # Callback success - DON'T close the interface, keep it open!
+
         if self.item_callback:
             self.item_callback(True)
         
-        # Don't close - stay in Pokemon interface so user can use more candies
-        self.close()  # Commented out to keep interface open
+
+        self.close()
     
     def evolve_pokemon(self, index: int, evolution_data: dict):
         """Evolve a pokemon"""
@@ -222,7 +222,7 @@ class Pokemon:
         old_name = pokemon["name"]
         new_name = evolution_data["evolves_to"]
         
-        # Update pokemon data
+
         pokemon["name"] = new_name
         if "new_sprites" in evolution_data:
             sprites = evolution_data["new_sprites"]
@@ -231,11 +231,11 @@ class Pokemon:
             if "idle" in sprites:
                 pokemon["idle"] = sprites["idle"]
         
-        # Show evolution message (you can make this fancier)
+
         from src.utils import Logger
         Logger.info(f"{old_name} evolved into {new_name}!")
         
-        # Update the sprite
+
         self.update_selected_pokemon_sprite()
         
     def get_quit_position(self):
@@ -251,11 +251,11 @@ class Pokemon:
             if self.selected_pokemon_sprite:
                 self.selected_pokemon_sprite.update(dt)
     def draw(self, screen: pg.Surface):
-        # Draw background
+
         screen.blit(self.party_box.image, (GameSettings.SCREEN_WIDTH // 2 - 600, GameSettings.SCREEN_HEIGHT // 2 - 300))
         screen.blit(self.pokemon_data.image, (GameSettings.SCREEN_WIDTH // 2 - 200 , GameSettings.SCREEN_HEIGHT // 2 - 200))
-        #
-        # Draw pokemon list
+
+
         pokemon_y = self.pokemon_start_y
         pokemon_index = 0
         pokemons = 0
@@ -264,7 +264,7 @@ class Pokemon:
             indicator_text = self.font_large.render(
                 f"Select Pokemon for {self.item_being_used}", 
                 True, 
-                (255, 200, 0)
+                (255, 255, 255)
             )
             indicator_shadow = self.font_large.render(
                 f"Select Pokemon for {self.item_being_used}", 
@@ -283,26 +283,26 @@ class Pokemon:
             
             
             if pokemon_index == self.selected_pokemon_index:
-                # Selected: faster, higher bounce
-                frame_duration = 0.10  # 80ms per frame = choppier
+
+                frame_duration = 0.10
                 frame = int(self.bounce_time / frame_duration) % 2
-                bounce_table = [-5, 5]  # discrete bounce steps
+                bounce_table = [-5, 5]
                 bounce_offset = bounce_table[frame]
             else:
-                # Unselected: slower, subtle bounce
+
                 frame_duration = 0.10
     
-                # add random phase shift per index
+
                 t = self.bounce_time + self.random_phase[min(pokemon_index, len(self.random_phase)-1)]
                 
                 frame = int(t / frame_duration) % 2
                 bounce_offset = [-1, 1][frame]
                             
             pokemons += 1
-            # Draw cursor if this pokemon is selected
+
             
             
-            # Draw pokemon name
+
 
             
             
@@ -323,7 +323,7 @@ class Pokemon:
         
         
         
-        # Draw selected pokemon sprite (display area on the left side)
+
         if self.selected_pokemon_sprite:
             selected_pokemon = (self._monsters_data[self.selected_pokemon_index]
                     if self.selected_pokemon_index < len(self._monsters_data)
@@ -331,23 +331,23 @@ class Pokemon:
             sprite_x = GameSettings.SCREEN_WIDTH // 2 - 80
             sprite_y = GameSettings.SCREEN_HEIGHT // 2 - 100
             
-            # Draw the animated sprite
+
             self.selected_pokemon_sprite.update_pos(Position(sprite_x, sprite_y))
             self.selected_pokemon_sprite.draw(screen)
             
-            # Draw Pokemon name
+
             name_text = self.font_large.render(selected_pokemon["name"], True, (255, 255, 255))
             name_shadow = self.font_large.render(selected_pokemon["name"], True, (0, 0, 0))
             screen.blit(name_shadow, (GameSettings.SCREEN_WIDTH // 2 + 162, GameSettings.SCREEN_HEIGHT // 2 - 123))
             screen.blit(name_text, (GameSettings.SCREEN_WIDTH // 2 + 160, GameSettings.SCREEN_HEIGHT // 2 - 125))
             
-            # Draw Level
+
             level_text = self.font_large.render(f"Lv.{selected_pokemon['level']}", True, (255, 255, 255))
             level_shadow = self.font_large.render(f"Lv.{selected_pokemon['level']}", True, (0, 0, 0))
             screen.blit(level_shadow, (GameSettings.SCREEN_WIDTH // 2 + 372, GameSettings.SCREEN_HEIGHT // 2 - 123))
             screen.blit(level_text, (GameSettings.SCREEN_WIDTH // 2 + 370, GameSettings.SCREEN_HEIGHT // 2 - 125))
             
-            # Draw HP text
+
             hp = selected_pokemon["hp"]
             max_hp = selected_pokemon["max_hp"]
             
@@ -356,36 +356,36 @@ class Pokemon:
             hp_text = self.font_large.render(f"HP: {int(hp)}/{int(max_hp)}", True, (255, 255, 255))
             screen.blit(hp_text, (GameSettings.SCREEN_WIDTH // 2 + 160, GameSettings.SCREEN_HEIGHT // 2 - 33))
             
-            # Draw HP bar
+
             bar_x = GameSettings.SCREEN_WIDTH // 2 + 155
             bar_y = GameSettings.SCREEN_HEIGHT // 2 - 75
             bar_width = 300
             bar_height = 40
             
-            # Background bar (dark gray)
+
             pg.draw.rect(screen, (40, 40, 40), (bar_x, bar_y, bar_width, bar_height))
             
-            # HP fill with color based on percentage
+
             hp_percentage = hp / max_hp if max_hp > 0 else 0
             current_bar_width = int(bar_width * hp_percentage)
             
             if hp_percentage > 0.5:
-                bar_color = (50, 200, 50)  # Green
+                bar_color = (50, 200, 50)
             elif hp_percentage > 0.2:
-                bar_color = (200, 200, 50)  # Yellow
+                bar_color = (200, 200, 50)
             else:
-                bar_color = (200, 50, 50)  # Red
+                bar_color = (200, 50, 50)
             
             if current_bar_width > 0:
                 pg.draw.rect(screen, bar_color, (bar_x, bar_y, current_bar_width, bar_height))
             
-            # Border
+
             pg.draw.rect(screen, (0, 0, 0), (bar_x, bar_y, bar_width, bar_height), 2)
                     
 
             
             
-        # Draw party count
+
         party_text = self.font_small.render(f"Party: {len(self._monsters_data)}/{self.max_party_size}", True, (70, 70, 70))
         screen.blit(party_text, (GameSettings.SCREEN_WIDTH // 2 - 500, GameSettings.SCREEN_HEIGHT // 2 + 300))
 
@@ -407,7 +407,7 @@ class Pokemon:
             self.item_use_mode = False
             self.item_being_used = None
             if self.item_callback:
-                self.item_callback(False)  # Cancelled
+                self.item_callback(False)
             self.item_callback = None
             return
         

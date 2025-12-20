@@ -18,7 +18,7 @@ class Bag:
         self.opened_from_menu = False
         self.game_manager = game_manager
         self.minimap_enabled = False
-        # Category system
+
         self.categories = [
             {"name": "Items", "bag_icon": "bag_1", "bg": "bg_1"},
             {"name": "Key Items", "bag_icon": "bag_2", "bg": "bg_2"},
@@ -43,7 +43,7 @@ class Bag:
         self.item_start_y = GameSettings.SCREEN_HEIGHT // 2 - 320
         self.item_spacing = 60
         
-        # Item selection
+
         self.selected_item_index = 0
         
         px, py = GameSettings.SCREEN_WIDTH // 2, GameSettings.SCREEN_HEIGHT * 3 // 4
@@ -51,42 +51,42 @@ class Bag:
         self.selected_item_index = 0
         self.selected_item_sprite = None
         
-        # Load initial sprites
+
         self.update_sprites()
         
-        self.using_rare_candy = False  # Track if we're selecting a pokemon for rare candy
+        self.using_rare_candy = False
         self.pending_item_use = None
         
     def update_sprites(self):
         """Update the background and bag icon based on current category"""
         current_cat = self.categories[self.current_category_index]
         
-        # Load background
+
         self.background = Sprite(f"Bag/bg_1.png", (GameSettings.SCREEN_WIDTH - 250, GameSettings.SCREEN_HEIGHT))
         
-        # Load bag icon (optional, if you want to display it)
+
         self.bag_icon = Sprite(f"Bag/{current_cat['bag_icon']}.PNG", (300, 300))
         self.bag_bar = Sprite(f"Bag/bar_bar_cool.png", (GameSettings.SCREEN_WIDTH, 200))
         
-        # Load cursor selector
+
         self.cursor = Sprite(f"Bag/cursor.png", (570, 110))
         self.category_bar = Sprite(f"Bag/category_bar_cool.png", (350, 90))
         
         self.left_arrow = Animation(
             "Bag/leftarrow.png",
-            rows=["idle"],  # If you have multiple animation states, add them here
-            n_keyframes=8,   # Number of frames in the animation (adjust based on your sprite)
-            size=(100, 70),   # Size of the selector
-            loop=1,           # Animation loop time in seconds
+            rows=["idle"],
+            n_keyframes=8,
+            size=(100, 70),
+            loop=1,
             vertical=True
         )
         
         self.right_arrow = Animation(
             "Bag/rightarrow.png",
-            rows=["idle"],  # If you have multiple animation states, add them here
-            n_keyframes=8,   # Number of frames in the animation (adjust based on your sprite)
-            size=(100, 70),   # Size of the selector
-            loop=1,           # Animation loop time in seconds
+            rows=["idle"],
+            n_keyframes=8,
+            size=(100, 70),
+            loop=1,
             vertical=True
         )
         
@@ -95,17 +95,17 @@ class Bag:
         direction: 1 for right, -1 for left
         """
         self.current_category_index = (self.current_category_index + direction) % len(self.categories)
-        self.selected_item_index = 0  # Reset selection when switching categories
+        self.selected_item_index = 0
         self.update_sprites()
         
     def get_current_category_items(self):
         """Get items that belong to the current category"""
         current_category = self.categories[self.current_category_index]["name"]
         
-        # Filter items by category
+
         filtered_items = []
         for item in self._items_data:
-            item_category = item.get("category", "Items")  # Default to "Items" if no category
+            item_category = item.get("category", "Items")
             if item_category == current_category:
                 filtered_items.append(item)
         
@@ -116,15 +116,15 @@ class Bag:
         current_items = self.get_current_category_items()
         
         if self.selected_item_index < len(current_items):
-            # An item is selected
+
             selected_item = current_items[self.selected_item_index]
             sprite_path = selected_item.get("sprite_path")
             if sprite_path:
-                self.selected_item_sprite = Sprite(sprite_path, (60, 60))  # <- Creates sprite
+                self.selected_item_sprite = Sprite(sprite_path, (60, 60))
             else:
                 self.selected_item_sprite = None
         else:
-            # CLOSE BAG is selected
+
             self.selected_item_sprite = None
     def add_money(self, amount: int):
         self.money += amount
@@ -144,7 +144,7 @@ class Bag:
             category: Category the item belongs to (Items, Key Items, Berries, etc.)
             count: Number to add
         """
-        # Auto-assign categories based on item name if no category provided
+
         if category is None:
             if item_name == "Potion":
                 category = "Medicine"
@@ -153,17 +153,17 @@ class Bag:
             elif item_name == 'Minimap':
                 category = 'Key Items'
             else:
-                category = "Items"  # Default category
+                category = "Items"
         
-        # Check if item already exists
+
         for item in self._items_data:
             if item["name"] == item_name:
                 item["count"] += count
-                # Update category for existing item too
+
                 item["category"] = category
                 return
         
-        # If not, add new item
+
         self._items_data.append({
             "name": item_name,
             "count": count,
@@ -182,14 +182,14 @@ class Bag:
     def use_rare_candy(self):
         """Start the rare candy usage flow"""
         if self.game_manager and hasattr(self.game_manager, 'pokemon'):
-            # Close bag and open pokemon interface
+
             self.overlay = False
             self.game_manager.pokemon.open_for_item_use("Rare Candy", self.on_rare_candy_used)
     
     def on_rare_candy_used(self, success: bool):
         """Callback when rare candy is used on a pokemon"""
         if success:
-            # Remove one rare candy from inventory
+
             current_items = self.get_current_category_items()
             for item in self._items_data:
                 if item["name"] == "Rare Candy":
@@ -198,7 +198,7 @@ class Bag:
                         self._items_data.remove(item)
                     break
         
-        # Reopen bag if it was open from menu
+
         if self.opened_from_menu:
             self.open()
             self.opened_from_menu = True
@@ -206,69 +206,71 @@ class Bag:
     def handle_input(self):
         """Handle keyboard input for category switching and item selection"""
         current_items = self.get_current_category_items()
-        max_index = len(current_items)  # CLOSE BAG is at index = len(current_items)
+        max_index = len(current_items)
         
-        # Switch left (previous category)
+
         if input_manager.key_pressed(pg.K_LEFT) or input_manager.key_pressed(pg.K_a):
             self.switch_category(-1)
             self.update_selected_item_sprite()
         
-        # Switch right (next category)
+
         if input_manager.key_pressed(pg.K_RIGHT) or input_manager.key_pressed(pg.K_d):
             self.switch_category(1)
             self.update_selected_item_sprite()
         
-        # Navigate up
+
         if input_manager.key_pressed(pg.K_UP) or input_manager.key_pressed(pg.K_w):
             if self.selected_item_index > 0:
                 self.selected_item_index -= 1
                 self.update_selected_item_sprite()
         
-        # Navigate down
+
         if input_manager.key_pressed(pg.K_DOWN) or input_manager.key_pressed(pg.K_s):
             if self.selected_item_index < max_index:
                 self.selected_item_index += 1
                 self.update_selected_item_sprite()
         
-        # Select item (Enter or E)
+
         if input_manager.key_pressed(pg.K_RETURN) or input_manager.key_pressed(pg.K_e):
             if self.selected_item_index == max_index:
-                # Selected CLOSE BAG
+
                 self.close(reopen_menu=True)
             else:
-            # An item was selected
+
                 selected_item = current_items[self.selected_item_index]
                 if selected_item["name"] == "Rare Candy":
+                    if not self.opened_from_menu:
+                        return
                     self.use_rare_candy()
                     return
                 
                 if selected_item["name"] in ["Minimap", "Watch"]:
-                    if not self.opened_from_menu:  # ADD THIS CHECK
+                    if not self.opened_from_menu:
                         return
                     if self.game_manager and hasattr(self.game_manager, 'minimap'):
-                        # Toggle minimap visibility
+
                         self.game_manager.minimap_enabled = not self.game_manager.minimap_enabled
-                        # Close bag after toggling
+
                         self.close(reopen_menu=self.opened_from_menu)
                     return
                 
-                # Town Map can only be used from menu
+
                 if selected_item["name"] == "Town Map":
                     if self.opened_from_menu:
-                        self.game_manager.townmap.opened_from_menu = False
+                        self.game_manager.townmap.opened_from_menu = True
                         self.close(reopen_menu=False)
                         self.game_manager.townmap.open()
-                    # If not from menu (in battle), do nothing
+
                 
-                # Other items can only be used in battle
+
                     return
 
-                if not self.opened_from_menu:  # Changed from elif
+                if not self.opened_from_menu:
                     self.item_used = True
                     self.close(False)
         
         
-        # Close bag with ESC
+
         if input_manager.key_pressed(pg.K_ESCAPE):
             self.close()
         
@@ -282,15 +284,15 @@ class Bag:
 
 
     def draw(self, screen: pg.Surface):
-        # Draw background
+
         screen.blit(self.background.image, (GameSettings.SCREEN_WIDTH // 2 - 520, GameSettings.SCREEN_HEIGHT // 2 - 360))
         
-        # Draw bag icon in top left corner
+
         screen.blit(self.bag_icon.image, (GameSettings.SCREEN_WIDTH // 2 - 540, GameSettings.SCREEN_HEIGHT // 2 - 200))
         screen.blit(self.category_bar.image, (GameSettings.SCREEN_WIDTH // 2 - 560, GameSettings.SCREEN_HEIGHT // 2 - 300))
         
-        selector_x = GameSettings.SCREEN_WIDTH // 2 - 540  # Position to the left of button
-        selector_y = GameSettings.SCREEN_HEIGHT // 2 - 50- (self.left_arrow.rect.height // 2)  # Center vertically (80 is button height)
+        selector_x = GameSettings.SCREEN_WIDTH // 2 - 540
+        selector_y = GameSettings.SCREEN_HEIGHT // 2 - 50- (self.left_arrow.rect.height // 2)
         self.left_arrow.update_pos(Position(selector_x - 70, selector_y))
         self.left_arrow.draw(screen)
         
@@ -300,7 +302,7 @@ class Bag:
         
         
         
-        # Draw category name
+
         current_category = self.categories[self.current_category_index]["name"]
         category_text = self.font_category.render(current_category, True, (255,255,255))
         category_shadow = self.font_category.render(current_category, True, (0, 0, 0))
@@ -310,38 +312,38 @@ class Bag:
         screen.blit(category_shadow, (center_x + 2, GameSettings.SCREEN_HEIGHT // 2 - 288))
         screen.blit(category_text, (center_x, GameSettings.SCREEN_HEIGHT // 2 - 290))
         
-        # Draw money
-        
-        
-        
-        # Draw navigation hints
 
         
-        # Draw items in current category
+        
+        
+
+
+        
+
         item_y = self.item_start_y
         current_items = self.get_current_category_items()
         
         screen.blit(self.bag_bar.image, (GameSettings.SCREEN_WIDTH // 2 - 640, GameSettings.SCREEN_HEIGHT // 2 + 170))
         
-        # Draw all items
+
         item_index = 0
         for item in current_items:
             name = item["name"]
             count = item["count"]
             
-            # Draw cursor if this item is selected
+
             if item_index == self.selected_item_index:
                 self.cursor.rect.topleft = (self.item_start_x + 50, item_y - 18)
                 self.cursor.draw(screen)
             
-            # Draw item sprite
+
             '''
             sprite = Sprite(item["sprite_path"], (40, 40))
             sprite.rect.topleft = (self.item_start_x, item_y)
             sprite.draw(screen)
             '''
             
-            # Draw item name and count
+
             name_text = self.font_category.render(str(name), True, (70, 70, 70))
             count_text = self.font_category.render(f"x {count}", True, (70, 70, 70))
             
@@ -359,22 +361,22 @@ class Bag:
             item_y += self.item_spacing
             item_index += 1
         
-        # Draw cursor if CLOSE BAG is selected
+
         if self.selected_item_index == len(current_items):
             self.cursor.rect.topleft = (self.item_start_x + 50, item_y - 18)
             self.cursor.draw(screen)
         
-        # Draw CLOSE BAG option at the end
+
         close_text = self.font_category.render("CLOSE BAG", True, (200, 70, 70))
         close_text_shadow = self.font_category.render("CLOSE BAG", True, (160, 160, 160))
         
         screen.blit(close_text_shadow, (self.item_start_x + 93, item_y + 3))
         screen.blit(close_text, (self.item_start_x + 90, item_y))
         
-        # Draw selected item sprite (display area on the left side)
+
         if self.selected_item_sprite:
-            sprite_x = GameSettings.SCREEN_WIDTH // 2 - 440  # <- Position X
-            sprite_y = GameSettings.SCREEN_HEIGHT // 2 + 280  # <- Position Y
+            sprite_x = GameSettings.SCREEN_WIDTH // 2 - 440
+            sprite_y = GameSettings.SCREEN_HEIGHT // 2 + 280
             self.selected_item_sprite.rect.center = (sprite_x, sprite_y)
             self.selected_item_sprite.draw(screen)
     def open(self):
@@ -401,5 +403,5 @@ class Bag:
         items = data.get("items") or []
         money = data.get("money", 0)
         bag = cls(items, money)
-        bag.fix_item_categories()  # Automatically fix categories when loading
+        bag.fix_item_categories()
         return bag

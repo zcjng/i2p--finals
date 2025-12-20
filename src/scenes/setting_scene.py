@@ -10,9 +10,9 @@ from src.core.services import scene_manager, sound_manager, input_manager
 from typing import override
 
 class SettingScene(Scene):
-    # Background Image
+
     background: BackgroundSprite
-    # Buttons
+
     exit_button: Button
     
     
@@ -24,8 +24,8 @@ class SettingScene(Scene):
 
         
         self.dim_overlay = pg.Surface((GameSettings.SCREEN_WIDTH, GameSettings.SCREEN_HEIGHT))
-        self.dim_overlay.set_alpha(150)  # Set transparency level (0-255)
-        self.dim_overlay.fill((0, 0, 0, 175))  # Fill with black
+        self.dim_overlay.set_alpha(150)
+        self.dim_overlay.fill((0, 0, 0, 175))
           
         px, py = GameSettings.SCREEN_WIDTH // 2, GameSettings.SCREEN_HEIGHT * 3 // 4
         
@@ -110,7 +110,7 @@ class SettingScene(Scene):
     def draw(self, screen: pg.Surface):
 
         self.background.draw(screen)
-        screen.blit(self.dim_overlay, (0, 0))  # Draw the dim overlay
+        screen.blit(self.dim_overlay, (0, 0))
         screen.blit(self.frame.image, (GameSettings.SCREEN_WIDTH // 2 - 420, GameSettings.SCREEN_HEIGHT // 2 - 350))
         
         screen.blit(self.title.image, (GameSettings.SCREEN_WIDTH // 2 - 145, GameSettings.SCREEN_HEIGHT // 2 - 360))

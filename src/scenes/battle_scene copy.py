@@ -64,7 +64,7 @@ class BattleScene(Scene):
         
         self.selector = Sprite("UI/raw/UI_Selector.png", (25, 25))
         
-        # Battle state
+
         self.message = f"A wild {self.enemy.name} appeared!"
         self.displayed_message = ''
         self.message_index = 0
@@ -84,11 +84,11 @@ class BattleScene(Scene):
         self.needs_show_menu = False
         self.battle_end_timer = 0
         
-        self.menu_index = 0  # 0=FIGHT, 1=BAG, 2=CATCH, 3=RUN
+        self.menu_index = 0
         self.menu_actions = [
             lambda: self.player_attack(),
-            lambda: self.game_manager.bag.open(),  # BAG - not implemented
-            lambda: self.game_manager.pokemon.open(), #self.catch_pokemon(enemy_pokemon to catch
+            lambda: self.game_manager.bag.open(),
+            lambda: self.game_manager.pokemon.open(),
             lambda: self.run_from_battle()
         ]
                 
@@ -107,7 +107,7 @@ class BattleScene(Scene):
         self.pokemon_button = Button(
             "UI/raw/UI_Flat_InputField01a.png", "UI/raw/UI_Flat_InputField01a.png",
             px + 150, py + 260, 200, 90,
-            lambda: self.game_manager.pokemon.open() #self.catch_pokemon(enemy_pokemon)
+            lambda: self.game_manager.pokemon.open()
         )
         
         self.run_button = Button(
@@ -125,11 +125,11 @@ class BattleScene(Scene):
             
     def sync_pokemon_to_bag(self):
         """Sync the battle pokemon's HP back to the bag"""
-        if not self.game_manager.pokemon._monsters_data:  # ← Changed from bag
+        if not self.game_manager.pokemon._monsters_data:
             return
         
-        # Find and update the player's pokemon in the party
-        for monster in self.game_manager.pokemon._monsters_data:  # ← Changed from bag
+
+        for monster in self.game_manager.pokemon._monsters_data:
             if monster.get('name') == self.player.name:
                 monster['hp'] = max(0, self.player.hp)
                 Logger.info(f"Updated {self.player.name} HP to {self.player.hp}")
@@ -150,7 +150,7 @@ class BattleScene(Scene):
             return
         
         self.player_turn = False
-        self.enemy_attack_timer = 1.5  # 1.5 seconds
+        self.enemy_attack_timer = 1.5
         self.needs_enemy_attack = True
         
     def enemy_attack(self):
@@ -173,11 +173,11 @@ class BattleScene(Scene):
         caught_pokemon = enemy_pokemon.copy()
         caught_pokemon['hp'] = max(0, self.enemy.hp)
         
-        if self.game_manager.pokemon.max_party_size <= len(self.game_manager.pokemon._monsters_data):  # ← Changed
+        if self.game_manager.pokemon.max_party_size <= len(self.game_manager.pokemon._monsters_data):
             self.game_manager.pc_storage.deposit_pokemon(caught_pokemon)
             self.set_message(f"Caught {self.enemy.name}! Sent to PC (Party full)")
         else:
-            self.game_manager.pokemon._monsters_data.append(caught_pokemon)  # ← Changed from bag
+            self.game_manager.pokemon._monsters_data.append(caught_pokemon)
             self.set_message(f"You just caught {self.enemy.name}!")
             
         self.battle_over = True
@@ -196,20 +196,20 @@ class BattleScene(Scene):
             sound_manager.play_bgm("RBY 107 Battle! (Trainer).ogg")
         
         self.waiting_input = False
-        self.intro_timer = 2.0  # 2 seconds
+        self.intro_timer = 2.0
         self.needs_show_menu = True
         
     def get_hp_color(self, hp_ratio: float):
         """Get HP bar color based on HP percentage (green -> yellow -> red)"""
         if hp_ratio > 0.5:
-            # Green to Yellow (100% -> 50%)
-            t = (hp_ratio - 0.5) / 0.5  # 1.0 at 100%, 0.0 at 50%
+
+            t = (hp_ratio - 0.5) / 0.5
             r = int(255 * (1 - t))
             g = 200
             b = 50
         else:
-            # Yellow to Red (50% -> 0%)
-            t = hp_ratio / 0.5  # 1.0 at 50%, 0.0 at 0%
+
+            t = hp_ratio / 0.5
             r = 255
             g = int(200 * t)
             b = 50
@@ -221,10 +221,10 @@ class BattleScene(Scene):
         hp_ratio = max(0, min(1, current_hp / max_hp))
         fill_width = int(width * hp_ratio)
         
-        # Background (dark gray)
+
         pg.draw.rect(screen, (40, 40, 40), (x, y, width, height))
         
-        # HP fill
+
         if fill_width > 0:
             color = self.get_hp_color(hp_ratio)
             pg.draw.rect(screen, color, (x, y, fill_width, height))
@@ -235,28 +235,28 @@ class BattleScene(Scene):
         if not self.waiting_input or self.battle_over:
             return
         
-        # Navigation
+
         if input_manager.key_pressed(pg.K_LEFT):
-            if self.menu_index % 2 == 1:  # Right column -> Left column
+            if self.menu_index % 2 == 1:
                 self.menu_index -= 1
 
                 
         elif input_manager.key_pressed(pg.K_RIGHT):
-            if self.menu_index % 2 == 0:  # Left column -> Right column
+            if self.menu_index % 2 == 0:
                 self.menu_index += 1
 
                 
         elif input_manager.key_pressed(pg.K_UP):
-            if self.menu_index >= 2:  # Bottom row -> Top row
+            if self.menu_index >= 2:
                 self.menu_index -= 2
 
                 
         elif input_manager.key_pressed(pg.K_DOWN):
-            if self.menu_index <= 1:  # Top row -> Bottom row
+            if self.menu_index <= 1:
                 self.menu_index += 2
 
         
-        # Selection (Enter, Space, or Z like Pokemon games)
+
         if input_manager.key_pressed(pg.K_RETURN) or input_manager.key_pressed(pg.K_z):
             self.menu_actions[self.menu_index]()
             
@@ -268,24 +268,24 @@ class BattleScene(Scene):
         px = GameSettings.SCREEN_WIDTH // 2
         py = GameSettings.SCREEN_HEIGHT // 2
         
-        # Menu positions (match your button positions)
+
         positions = [
-            (px + 120, py + 205),  # FIGHT
-            (px + 400, py + 205),  # BAG
-            (px + 120, py + 280),  # CATCH
-            (px + 400, py + 280),  # RUN
+            (px + 120, py + 205),
+            (px + 400, py + 205),
+            (px + 120, py + 280),
+            (px + 400, py + 280),
         ]
         
         x, y = positions[self.menu_index]
         
-        # Draw a triangle pointer
+
         screen.blit(self.selector.image, (x, y))
     def update(self, dt: float):
         
         if self.battle_over and self.battle_end_timer > 0:
             self.battle_end_timer -= dt
             if self.battle_end_timer <= 0:
-                # Return to game after timer expires
+
                 self.run_from_battle()
                 return
             
@@ -298,7 +298,7 @@ class BattleScene(Scene):
                 
         if input_manager.key_pressed(pg.K_e) or input_manager.key_pressed(pg.K_SPACE):
             if self.message_index < len(self.message):
-            # Instantly show full message
+
                 self.message_index = len(self.message)
                 self.displayed_message = self.message
                 
@@ -311,7 +311,7 @@ class BattleScene(Scene):
                 self.displayed_message = self.message[:self.message_index]
                 self.message_timer -= add_char * self.message_speed
         
-        # Handle enemy attack timer
+
         if self.needs_enemy_attack and not self.battle_over:
             self.enemy_attack_timer -= dt
             if self.enemy_attack_timer <= 0:

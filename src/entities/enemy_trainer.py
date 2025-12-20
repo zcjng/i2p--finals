@@ -26,6 +26,7 @@ class EnemyTrainer(Entity):
     warning_sign: Sprite
     detected: bool
     los_direction: Direction
+    defeated: bool
 
     @override
     def __init__(
@@ -36,10 +37,13 @@ class EnemyTrainer(Entity):
         classification: EnemyTrainerClassification = EnemyTrainerClassification.STATIONARY,
         max_tiles: int | None = 2,
         facing: Direction | None = None,
+        defeated: bool = False,
     ):
         super().__init__(x, y, game_manager)
         self.classification = classification
         self.max_tiles = max_tiles
+        self.defeated = defeated
+        
         if classification == EnemyTrainerClassification.STATIONARY:
             self._movement = IdleMovement()
             if facing is None:
@@ -55,7 +59,13 @@ class EnemyTrainer(Entity):
     @override
     def update(self, dt: float):
         self._movement.update(self, dt)
-        self._has_los_to_player()
+        
+
+        if not self.defeated:
+            self._has_los_to_player()
+        else:
+            self.detected = False
+            
         if self.detected and input_manager.key_pressed(pygame.K_SPACE):
             pass
         self.animation.update_pos(self.position)
@@ -63,12 +73,20 @@ class EnemyTrainer(Entity):
     @override
     def draw(self, screen: pygame.Surface, camera: PositionCamera):
         super().draw(screen, camera)
-        if self.detected:
+        
+
+        if self.detected and not self.defeated:
             self.warning_sign.draw(screen, camera)
+            
         if GameSettings.DRAW_HITBOXES:
             los_rect = self._get_los_rect()
             if los_rect is not None:
                 pygame.draw.rect(screen, (255, 255, 0), camera.transform_rect(los_rect), 1)
+
+    def mark_as_defeated(self):
+        """Mark this trainer as defeated so they can't battle again"""
+        self.defeated = True
+        self.detected = False
 
     def _set_direction(self, direction: Direction):
         self.direction = direction
@@ -123,6 +141,11 @@ class EnemyTrainer(Entity):
         return pygame.Rect(0, 0, 0, 0)
 
     def _has_los_to_player(self):
+
+        if self.defeated:
+            self.detected = False
+            return
+            
         player = self.game_manager.player
         if player is None:
             self.detected = False
@@ -146,6 +169,7 @@ class EnemyTrainer(Entity):
     def from_dict(cls, data: dict, game_manager: GameManager):
         classification = EnemyTrainerClassification(data.get("classification", "stationary"))
         max_tiles = data.get("max_tiles")
+        defeated = data.get("defeated", False)
         facing_val = data.get("facing")
         facing: Direction | None = None
         if facing_val is not None:
@@ -162,6 +186,7 @@ class EnemyTrainer(Entity):
             classification,
             max_tiles,
             facing,
+            defeated,
         )
 
     @override
@@ -170,4 +195,5 @@ class EnemyTrainer(Entity):
         base["classification"] = self.classification.value
         base["facing"] = self.direction.name
         base["max_tiles"] = self.max_tiles
+        base["defeated"] = self.defeated
         return base

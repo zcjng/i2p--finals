@@ -55,8 +55,9 @@ class NPC(Entity):
     def update(self, dt: float):
         self._movement.update(self, dt)
         self._has_los_to_player()
-        if self.detected and input_manager.key_pressed(pygame.K_SPACE):
-            self.shop.open()
+        if self.detected:
+            if input_manager.key_pressed(pygame.K_SPACE) or input_manager.key_pressed(pygame.K_e):
+                self.shop.open()
         self.shop.update(dt)
         self.animation.update_pos(self.position)
 

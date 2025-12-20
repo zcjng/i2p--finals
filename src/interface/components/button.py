@@ -66,7 +66,7 @@ class Button(UIComponent):
 
         '''
         if self.is_pressed:
-            # Pressed button - darker/black
+
             img = self.img_button.image.copy()
             img.fill((40, 40, 40, 220), special_flags=pg.BLEND_RGBA_MULT)
             screen.blit(img, self.hitbox)

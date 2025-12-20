@@ -7,7 +7,7 @@ from src.core.services import sound_manager, scene_manager, input_manager
 from src.interface.components import Button
 from typing import override
 
-# Element type effectiveness chart
+
 ELEMENT_CHART = {
     "Fire": {"strong": ["Grass", "Ice"], "weak": ["Water", "Ground", "Rock"]},
     "Water": {"strong": ["Fire", "Ground", "Rock"], "weak": ["Grass", "Lightning"]},
@@ -40,7 +40,7 @@ class Character:
         self.level = pokemon_data.get('level', 1)
         self.element = pokemon_data.get('element', 'Normal')
         
-        # Load attacks from pokemon data or use defaults
+
         attack_data = pokemon_data.get('attacks', [])
         self.attacks = []
         for atk in attack_data:
@@ -51,14 +51,14 @@ class Character:
                 atk.get('accuracy', 1.0)
             ))
         
-        # If no attacks provided, give default attacks
+
         if not self.attacks:
             self.attacks = [
                 Attack("Tackle", "Normal", 40, 1.0),
                 Attack(f"{self.element} Blast", self.element, 60, 0.9)
             ]
         
-        # Status effect buffs
+
         self.attack_buff = 0
         self.defense_buff = 0
   
@@ -83,11 +83,17 @@ class Character:
         self.hp -= float(amount)
     
     def calculate_damage(self, attack: Attack, defender):
-        """Calculate damage with element effectiveness"""
-        base_damage = attack.power + self.attack - defender.defense
+        """Calculate damage with element effectiveness using Pokemon-style formula"""
+    
+
+
+        level_modifier = (2 * self.level / 5 + 2)
+        base_damage = (level_modifier * attack.power * self.attack) / (defender.defense * 50) + 2
+        
+
         base_damage = max(1.0, base_damage)
         
-        # Check type effectiveness
+
         multiplier = 1.0
         if attack.element in ELEMENT_CHART:
             chart = ELEMENT_CHART[attack.element]
@@ -98,7 +104,15 @@ class Character:
                 multiplier = 0.5
                 Logger.info(f"It's not very effective... ({attack.element} vs {defender.element})")
         
-        return base_damage * multiplier, multiplier
+
+        final_damage = base_damage * multiplier
+        
+
+        import random
+        random_factor = random.uniform(0.85, 1.0)
+        final_damage = final_damage * random_factor
+        
+        return final_damage, multiplier
   
     def attack_target(self, attack: Attack, other):
         damage, multiplier = self.calculate_damage(attack, other)
@@ -106,7 +120,7 @@ class Character:
         return damage, multiplier
 
 class BattleScene(Scene):
-    def __init__(self, player_pokemon, enemy_pokemon, game_manager):
+    def __init__(self, player_pokemon, enemy_pokemon, game_manager, enemy_trainer=None):
         super().__init__()
         self.background = BackgroundSprite("backgrounds/background1.png")
         self.game_manager = game_manager
@@ -134,7 +148,7 @@ class BattleScene(Scene):
         
         self.selector = Sprite("UI/raw/UI_Selector.png", (25, 25))
         
-        # Battle state
+
         self.message = f"A wild {self.enemy.name} appeared!"
         self.displayed_message = ''
         self.message_index = 0
@@ -154,23 +168,24 @@ class BattleScene(Scene):
         self.needs_show_menu = False
         self.battle_end_timer = 0
         
-        # Menu system
+
         self.in_main_menu = True
         self.in_attack_menu = False
         self.menu_index = 0
+        self.enemy_trainer = enemy_trainer
         
-        # Main menu actions
+
         self.main_menu_actions = [
-            lambda: self.open_attack_menu(),  # FIGHT
-            lambda: self.open_bag(),  # BAG
-            lambda: self.game_manager.pokemon.open(),  # POKEMON
-            lambda: self.run_from_battle()  # RUN
+            lambda: self.open_attack_menu(),
+            lambda: self.open_bag(),
+            lambda: self.game_manager.pokemon.open(),
+            lambda: self.run_from_battle()
         ]
         
-        # Attack menu (will use player.attacks)
+
         self.attack_menu_index = 0
         
-        # Buttons for main menu
+
         self.fight_button = Button(
             "UI/raw/UI_Flat_InputField01a.png", "UI/raw/UI_Flat_InputField01a.png",
             px + 150, py + 150, 200, 90,
@@ -229,7 +244,7 @@ class BattleScene(Scene):
             self.player.apply_defense_buff(buff_amount)
             self.set_message(f"Used Defense Potion! Defense increased by {buff_amount}!")
         
-        # Consume the item
+
         for item in self.game_manager.bag._items_data:
             if item["name"] == item_name:
                 item["count"] -= 1
@@ -237,9 +252,9 @@ class BattleScene(Scene):
                     self.game_manager.bag._items_data.remove(item)
                 break
         
-        self.waiting_input = False  #
+        self.waiting_input = False
         
-        # After using item, enemy attacks
+
         self.player_turn = False
         self.enemy_attack_timer = 1.5
         self.needs_enemy_attack = True
@@ -266,7 +281,7 @@ class BattleScene(Scene):
         
         damage, multiplier = self.player.attack_target(attack, self.enemy)
         
-        # Effectiveness message
+
         effectiveness = ""
         if multiplier > 1.0:
             effectiveness = " It's super effective!"
@@ -277,6 +292,9 @@ class BattleScene(Scene):
         
         if not self.enemy.is_alive():
             self.battle_over = True
+            if self.enemy_trainer is not None:
+                self.enemy_trainer.mark_as_defeated()
+                Logger.info(f"Trainer defeated! Trainer will no longer initiate battles.")
             self.set_message(f"{self.enemy.name} fainted! You win!")
             self.battle_end_timer = 2.0
             return
@@ -356,7 +374,6 @@ class BattleScene(Scene):
             sound_manager.play_bgm("RBY 107 Battle! (Trainer).ogg")
         
         self.waiting_input = False
-        self.intro_timer = 2.0
         self.needs_show_menu = True
         
     def get_hp_color(self, hp_ratio: float):
@@ -481,11 +498,11 @@ class BattleScene(Scene):
         self.player_hp_display += (self.player.hp - self.player_hp_display) * 0.15
         self.enemy_hp_display += (self.enemy.hp - self.enemy_hp_display) * 0.15
         
-        # Handle bag overlay
+
         if self.game_manager.bag.overlay:
             self.game_manager.bag.update(dt)
             if self.game_manager.bag.item_used:
-                # Check which item was used
+
                 selected_items = self.game_manager.bag.get_current_category_items()
                 if self.game_manager.bag.selected_item_index < len(selected_items):
                     used_item = selected_items[self.game_manager.bag.selected_item_index]
@@ -529,7 +546,7 @@ class BattleScene(Scene):
         font = pg.font.Font("assets/fonts/Pokemon.ttf", 50)
         name_font = pg.font.Font("assets/fonts/Pokemon.ttf", 70)
         
-        # Player info
+
         p_name_text_shadow = name_font.render(self.player.name, True, (0,0,0))
         p_name_text_shadow.set_alpha(50)
         screen.blit(p_name_text_shadow, (px + 105, py - 46))
@@ -539,25 +556,25 @@ class BattleScene(Scene):
         p_level_text = name_font.render(f"Lv{self.player.level}", True, (0,0,0))
         screen.blit(p_level_text, (px + 425, py - 48))
         
-        # Enemy info
+
         e_name_text = name_font.render(self.enemy.name, True, (0,0,0))
         screen.blit(e_name_text, (px - 565, py - 308))
         
         e_level_text = name_font.render(f"Lv{self.enemy.level}", True, (0,0,0))
         screen.blit(e_level_text, (px - 200, py - 308))
         
-        # Message
+
         text = font.render(self.displayed_message, True, (255, 255, 255))
         screen.blit(text, (px - 580, py + 185))
         
-        # HP bars
+
         self.draw_hp_bar(screen, px + 260, py + 30, self.player_hp_display, self.player.max_hp, width=270, height=15)
         self.draw_hp_bar(screen, px - 360, py - 230, self.enemy_hp_display, self.enemy.max_hp, width=270, height=15)
         
-        # Draw menus
+
         if self.waiting_input and not self.battle_over:
             if self.in_attack_menu:
-                # Draw attack selection menu
+
                 screen.blit(self.menu.image, (px + 60, py + 150))
                 button_font = pg.font.Font("assets/fonts/Pokemon.ttf", 60)
                 buttons_font = pg.font.Font("assets/fonts/Pokemon.ttf", 70)
@@ -566,13 +583,13 @@ class BattleScene(Scene):
                     attack_text = buttons_font.render(f"{attack.name} ({attack.element})", True, (50, 50, 50))
                     screen.blit(attack_text, (px + 140, y_pos))
                 
-                # Back option
+
 
                 
                 self.draw_attack_menu_selector(screen)
                 
             elif self.in_main_menu:
-                # Draw main battle menu
+
                 self.fight_button.draw(screen)
                 self.pokemon_button.draw(screen)
                 self.bag_button.draw(screen)
@@ -586,7 +603,7 @@ class BattleScene(Scene):
                 screen.blit(button_font.render("RUN", True, (50, 50, 50)), (px + 440, py + 260))
                 self.draw_main_menu_selector(screen)
 
-        # Draw overlays
+
         if self.game_manager.bag.overlay:
             screen.blit(self.game_manager.bag.dim_overlay, (0, 0))
             self.game_manager.bag.draw(screen)

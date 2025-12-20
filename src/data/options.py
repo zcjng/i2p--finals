@@ -17,8 +17,8 @@ class Options:
 
         
         self.dim_overlay = pg.Surface((GameSettings.SCREEN_WIDTH, GameSettings.SCREEN_HEIGHT))
-        self.dim_overlay.set_alpha(150)  # Set transparency level (0-255)
-        self.dim_overlay.fill((0, 0, 0, 175))  # Fill with black
+        self.dim_overlay.set_alpha(150)
+        self.dim_overlay.fill((0, 0, 0, 175))
           
         px, py = GameSettings.SCREEN_WIDTH // 2, GameSettings.SCREEN_HEIGHT * 3 // 4
         
@@ -91,7 +91,7 @@ class Options:
         
 
     def draw(self, screen: pg.Surface):
-        # Draw the dim overlay
+
         screen.blit(self.frame.image, (GameSettings.SCREEN_WIDTH // 2 - 420, GameSettings.SCREEN_HEIGHT // 2 - 350))
         
         screen.blit(self.title.image, (GameSettings.SCREEN_WIDTH // 2 - 145, GameSettings.SCREEN_HEIGHT // 2 - 360))

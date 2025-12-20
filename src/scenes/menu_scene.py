@@ -8,9 +8,9 @@ from src.core.services import scene_manager, sound_manager, input_manager
 from typing import override
 
 class MenuScene(Scene):
-    # Background Image
+
     background: BackgroundSprite
-    # Buttons
+
     play_button: Button
     setting_button: Button
     
@@ -34,7 +34,7 @@ class MenuScene(Scene):
         
     @override
     def enter(self):
-        current_bgm = sound_manager.current_bgm  # get the currently playing track
+        current_bgm = sound_manager.current_bgm
         if current_bgm != "RBY 101 Opening (Part 1).ogg":
             sound_manager.play_bgm("RBY 101 Opening (Part 1).ogg")
 

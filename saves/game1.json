@@ -6,12 +6,16 @@
         {
           "x": 24,
           "y": 21,
-          "destination": "gym.tmx"
+          "destination": "gym.tmx",
+          "spawn_x": 12,
+          "spawn_y": 14
         },
         {
           "x": 15,
           "y": 26,
-          "destination": "house.tmx"
+          "destination": "house.tmx",
+          "spawn_x": 12,
+          "spawn_y": 14
         }
       ],
       "player": {
@@ -24,21 +28,24 @@
           "y": 29.0,
           "classification": "stationary",
           "facing": "DOWN",
-          "max_tiles": 3
+          "max_tiles": 3,
+          "defeated": false
         },
         {
           "x": 54.0,
           "y": 14.0,
           "classification": "stationary",
           "facing": "UP",
-          "max_tiles": 2
+          "max_tiles": 2,
+          "defeated": false
         },
         {
           "x": 31.0,
           "y": 31.0,
           "classification": "stationary",
           "facing": "UP",
-          "max_tiles": 3
+          "max_tiles": 3,
+          "defeated": false
         }
       ],
       "npcs": []
@@ -49,17 +56,23 @@
         {
           "x": 11,
           "y": 15,
-          "destination": "map3.tmx"
+          "destination": "map3.tmx",
+          "spawn_x": 24,
+          "spawn_y": 23
         },
         {
           "x": 12,
           "y": 15,
-          "destination": "map3.tmx"
+          "destination": "map3.tmx",
+          "spawn_x": 24,
+          "spawn_y": 23
         },
         {
           "x": 13,
           "y": 15,
-          "destination": "map3.tmx"
+          "destination": "map3.tmx",
+          "spawn_x": 24,
+          "spawn_y": 23
         }
       ],
       "player": {
@@ -75,7 +88,9 @@
         {
           "x": 12,
           "y": 15,
-          "destination": "map3.tmx"
+          "destination": "map3.tmx",
+          "spawn_x": 16,
+          "spawn_y": 28
         }
       ],
       "player": {
@@ -96,40 +111,16 @@
   ],
   "current_map": "map3.tmx",
   "player": {
-    "x": 23.0,
+    "x": 16.0,
     "y": 28.0
   },
   "bag": {
     "items": [
       {
-        "name": "Potion",
-        "count": 5,
-        "sprite_path": "ingame_ui/potion.png",
-        "category": "Medicine"
-      },
-      {
         "name": "Town Map",
         "count": 1,
         "sprite_path": "ingame_ui/potion.png",
         "category": "Key Items"
-      },
-      {
-        "name": "Pokeball",
-        "count": 10,
-        "sprite_path": "ingame_ui/ball.png",
-        "category": "Poke Balls"
-      },
-      {
-        "name": "Strength Potion",
-        "count": 2,
-        "sprite_path": "ingame_ui/options5.png",
-        "category": "Medicine"
-      },
-      {
-        "name": "Defense Potion",
-        "count": 3,
-        "sprite_path": "ingame_ui/options6.png",
-        "category": "Medicine"
       },
       {
         "name": "Minimap",
@@ -139,25 +130,49 @@
       },
       {
         "name": "Rare Candy",
-        "count": 86,
+        "count": 71,
         "sprite_path": "ingame_ui/options2.png",
         "category": "Medicine"
+      },
+      {
+        "name": "Potion",
+        "count": 10,
+        "sprite_path": "ingame_ui/potion.png",
+        "category": "Medicine"
+      },
+      {
+        "name": "Strength Potion",
+        "count": 9,
+        "sprite_path": "ingame_ui/options5.png",
+        "category": "Medicine"
+      },
+      {
+        "name": "Defense Potion",
+        "count": 9,
+        "sprite_path": "ingame_ui/options6.png",
+        "category": "Medicine"
+      },
+      {
+        "name": "Pokeball",
+        "count": 8,
+        "sprite_path": "ingame_ui/ball.png",
+        "category": "Poke Balls"
       }
     ],
-    "money": 5000
+    "money": 3000
   },
   "pokemon": {
     "monsters": [
       {
         "name": "Leaf",
-        "hp": 90,
-        "max_hp": 100,
-        "level": 20,
+        "hp": 105,
+        "max_hp": 115,
+        "level": 25,
         "sprite_path": "menu_sprites/menusprite1.png",
         "battle_sprite": "sprites/sprite1.png",
         "idle": "sprites/sprite1_idle.png",
-        "attack": 40,
-        "defense": 50,
+        "attack": 50,
+        "defense": 15,
         "element": "Fire"
       },
       {
@@ -244,7 +259,6 @@
         "battle_sprite": "sprites/sprite5.png",
         "idle": "sprites/sprite5_idle.png",
         "element": "Lightning"
-
       }
     ]
   },

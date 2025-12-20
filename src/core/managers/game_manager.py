@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class GameManager:
-    # Entities
+
     player: Player | None
     enemy_trainers: dict[str, list[EnemyTrainer]]
     npcs: dict[str, list[NPC]]
@@ -24,11 +24,11 @@ class GameManager:
     options: "Options"
     pokemon: "Pokemon"
     
-    # Map properties
+
     current_map_key: str
     maps: dict[str, Map]
     
-    # Changing Scene properties
+
     should_change_scene: bool
     next_map: str
     _transitioning: bool = False
@@ -49,7 +49,7 @@ class GameManager:
         from src.data.pokemon import Pokemon
         from src.data.pc import PCStorage
         from src.data.townmap import TownMap
-        # Game Properties
+
         self.maps = maps
         self.townmap = TownMap(self)
         self.current_map_key = start_map
@@ -69,9 +69,12 @@ class GameManager:
         self.encounter_rate = 0.2
         self.in_battle = False
         self.overlay = False
-        # Check If you should change scene
+
         self.should_change_scene = False
         self.next_map = ""
+        self.custom_spawn = None
+        
+        
         
     @property
     def current_map(self):
@@ -88,12 +91,13 @@ class GameManager:
     def current_teleporter(self):
         return self.maps[self.current_map_key].teleporters
     
-    def switch_map(self, target: str, player_direction):
+    def switch_map(self, target: str, player_direction, custom_spawn: Position = None):
         if target not in self.maps:
             Logger.warning(f"Map '{target}' not loaded; cannot switch.")
             return
         
         self.next_map = target
+        self.custom_spawn = custom_spawn
         self.last_direction = player_direction
         self.should_change_scene = True
         self._transitioning = True
@@ -112,11 +116,28 @@ class GameManager:
         self.current_map_key = self.next_map
         self.next_map = ""
         if self.player:
-            self.player.position = self.maps[self.current_map_key].spawn
+            if self.custom_spawn is not None:
+                spawn_pos = self.custom_spawn
+                Logger.info(f"Using custom spawn: ({spawn_pos.x}, {spawn_pos.y})")
+                self.custom_spawn = None
+            else:
+                spawn_pos = self.maps[self.current_map_key].spawn
+                Logger.info(f"Using default spawn: ({spawn_pos.x}, {spawn_pos.y})")
+            
+
+            self.player.position.x = spawn_pos.x
+            self.player.position.y = spawn_pos.y
             self.player.animation.update_pos(self.player.position)
+            
+
             self.player.moving = False
-            self.player.move_target = Position(self.player.position.x, self.player.position.y)
-            self.player.move_start = Position(self.player.position.x, self.player.position.y)
+            self.player.move_target = Position(spawn_pos.x, spawn_pos.y)
+            self.player.move_start = Position(spawn_pos.x, spawn_pos.y)
+            
+
+            if hasattr(self.player, 'camera'):
+                self.player.camera.x = spawn_pos.x - GameSettings.SCREEN_WIDTH // 2
+                self.player.camera.y = spawn_pos.y - GameSettings.SCREEN_HEIGHT // 2
    
     def map_transition(self, dt):
         if not self._transitioning:
@@ -169,7 +190,7 @@ class GameManager:
         
         if input_manager.key_pressed(pg.K_e):
             Logger.info('Player forced encounter!')
-            self.wild_encounter()
+            self.wild_encounter(None)
             return
         
         if just_stopped:
@@ -183,10 +204,10 @@ class GameManager:
             self.steps_last = 0
             if random.random() < self.encounter_rate:
                 Logger.info('Wild pokemon has appeared!')
-                self.wild_encounter()
+                self.wild_encounter(None)
 
 
-    def wild_encounter(self):
+    def wild_encounter(self, enemy_trainer):
         
         self.in_battle = True
         sound_manager.play_bgm("RBY 107 Battle! (Trainer).ogg")
@@ -201,7 +222,7 @@ class GameManager:
             return
         
         from src.scenes.battle_scene import BattleScene
-        battle_scene = BattleScene(player_pokemon, wild_pokemon, self)
+        battle_scene = BattleScene(player_pokemon, wild_pokemon, self, enemy_trainer)
         scene_manager.register_scene('battle', battle_scene)
         scene_manager.change_scene('battle')
         
@@ -215,7 +236,7 @@ class GameManager:
                 "level": 30, 
                 "sprite_path": "menu_sprites/menusprite4.png", 
                 "battle_sprite": "sprites/sprite4.png",
-                "idle": "sprites/sprite4_idle.png",  # ADD THIS
+                "idle": "sprites/sprite4_idle.png",
                 "element": "Water"
             },
             { 
@@ -225,7 +246,7 @@ class GameManager:
                 "level": 28, 
                 "sprite_path": "menu_sprites/menusprite5.png", 
                 "battle_sprite": "sprites/sprite5.png",
-                "idle": "sprites/sprite5_idle.png",  # ADD THIS
+                "idle": "sprites/sprite5_idle.png",
                 "element": "Rock"
             },
             { 
@@ -235,7 +256,7 @@ class GameManager:
                 "level": 40, 
                 "sprite_path": "menu_sprites/menusprite6.png", 
                 "battle_sprite": "sprites/sprite6.png",
-                "idle": "sprites/sprite6_idle.png",  # ADD THIS
+                "idle": "sprites/sprite6_idle.png",
                 "element": "Flying"
             }
         ]
@@ -250,7 +271,7 @@ class GameManager:
             "level": 30, 
             "sprite_path": "menu_sprites/menusprite4.png", 
             "battle_sprite": "sprites/sprite4.png",
-            "idle": "sprites/sprite4_idle.png",  # ADD THIS TO DEFAULT TOO
+            "idle": "sprites/sprite4_idle.png",
             "element": "Grass"
         }
         
@@ -285,14 +306,10 @@ class GameManager:
             block["enemy_trainers"] = [t.to_dict() for t in self.enemy_trainers.get(key, [])]
             block["npcs"] = [t.to_dict() for t in self.npcs.get(key, [])]
             
-            if self.player and self.current_map_key == key:
-                player_pos = self.player.position
-            else:
-                player_pos = m.spawn
-                
+
             block["player"] = {
-                "x": player_pos.x / GameSettings.TILE_SIZE,
-                "y": player_pos.y / GameSettings.TILE_SIZE
+                "x": m.spawn.x / GameSettings.TILE_SIZE,
+                "y": m.spawn.y / GameSettings.TILE_SIZE,
             }
             map_blocks.append(block)
         return {
@@ -336,7 +353,7 @@ class GameManager:
         current_map = data["current_map"]
         gm = cls(
             maps, current_map,
-            None, # Player
+            None,
             trainers,
             npc,
             bag=None,
